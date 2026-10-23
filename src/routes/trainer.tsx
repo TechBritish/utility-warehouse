@@ -711,14 +711,15 @@ function Trainer() {
 
               <Button
                 onClick={() => void startSession()}
-                disabled={focus.length === 0}
-                className={cn(
-                  "mt-6 min-h-12 w-full rounded-xl text-base",
-                  focus.length > 0 && "relative animate-pulse-ring",
-                )}
+                className="mt-6 min-h-12 w-full rounded-xl text-base relative animate-pulse-ring"
               >
                 Start practice session
               </Button>
+              {focus.length === 0 && (
+                <p className="mt-2 text-center text-xs text-muted-foreground">
+                  Tip: pick what you want to practise above, or just start — we'll default to objections and bundles.
+                </p>
+              )}
             </div>
           </div>
         ) : (

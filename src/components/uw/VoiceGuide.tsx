@@ -196,7 +196,8 @@ export function VoiceGuide() {
       // a consistent voice — just with its own first message, system prompt
       // and navigation tools layered on top for this site-guide context.
       await vapi.start(assistantId, {
-        firstMessage: "Hi, I'm Ava, your UW Partner Coach guide. What can I help you with?",
+        firstMessage:
+          "Hi, I'm Ava — think of me as your UW sales trainer. I can tell you how the Partner opportunity works, help you handle a tricky customer question, or get you practising right now. What would help most?",
         model: {
           provider: "openai",
           model: "gpt-4o-mini",
