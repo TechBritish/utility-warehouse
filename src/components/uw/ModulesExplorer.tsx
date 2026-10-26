@@ -184,12 +184,12 @@ export function ModulesExplorer() {
         </div>
 
         {/* Module video */}
-        <div className="relative mt-6 aspect-video w-full overflow-hidden rounded-2xl bg-gradient-night">
+        <div className="relative mt-6 max-h-[70vh] w-full overflow-hidden rounded-2xl bg-gradient-night">
           <video
             key={active.video}
             controls
             preload="metadata"
-            className="size-full object-cover"
+            className="mx-auto max-h-[70vh] w-full object-contain"
             aria-label={`${active.title} video walkthrough`}
           >
             <source src={active.video} type="video/mp4" />
