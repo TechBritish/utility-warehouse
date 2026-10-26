@@ -18,6 +18,8 @@ export type TrainingModule = {
   completedOn?: string;
   learn: string[];
   prerequisite?: { id: string; title: string };
+  /** Path to the module's video walkthrough, served from /public. */
+  video: string;
 };
 
 // `status`/`completedOn` below are placeholder defaults only — real values
@@ -32,6 +34,7 @@ export const trainingModules: TrainingModule[] = [
     description: "Craft the personal story that opens every customer conversation.",
     status: "unlocked",
     meta: "📹 12 min video • 🎙️ 5 min practice",
+    video: "/your_uw_story.mp4",
     learn: [
       "Introduce yourself without sounding scripted",
       "Explain why you joined UW in under 30 seconds",
@@ -48,6 +51,7 @@ export const trainingModules: TrainingModule[] = [
     description: "Understand how you get paid — and how to talk about it compliantly.",
     status: "locked",
     meta: "📹 18 min video • 🎙️ 5 min practice",
+    video: "/commission_and_earnings.mp4",
     learn: [
       "Read your commission statement with confidence",
       "Explain the earnings model without income promises",
@@ -66,6 +70,7 @@ export const trainingModules: TrainingModule[] = [
       "Show customers where their money goes today, build a like-for-like comparison and use real stories to build trust — without ever promising a number you cannot prove.",
     status: "locked",
     meta: "📹 15 min video • 🎙️ 5 min practice",
+    video: "/bill_savings_and_social_proof.mp4",
     learn: [
       "Calculate real customer savings using the UW bundle discount",
       "Handle “too expensive” objections with confidence",
@@ -84,6 +89,7 @@ export const trainingModules: TrainingModule[] = [
     description: "Complete Module 3 to unlock",
     status: "locked",
     meta: "30 min interactive",
+    video: "/closing_and_onboarding.mp4",
     learn: [
       "Ask for the switch naturally",
       "Complete the sign-up journey with the customer",

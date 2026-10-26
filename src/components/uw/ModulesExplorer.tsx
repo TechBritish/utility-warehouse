@@ -7,7 +7,6 @@ import {
   Handshake,
   Check,
   Lock,
-  Play,
   Clock,
   BarChart3,
   Users,
@@ -184,14 +183,18 @@ export function ModulesExplorer() {
           </div>
         </div>
 
-        {/* Video thumbnail */}
+        {/* Module video */}
         <div className="relative mt-6 aspect-video w-full overflow-hidden rounded-2xl bg-gradient-night">
-          <div className="absolute inset-0 grid place-items-center">
-            <span className="grid size-14 place-items-center rounded-full bg-primary-foreground/15 text-primary-foreground backdrop-blur">
-              <Play className="size-6 translate-x-0.5" aria-hidden="true" />
-            </span>
-          </div>
-          <span className="absolute bottom-3 left-3 font-mono text-xs text-primary-foreground/80">
+          <video
+            key={active.video}
+            controls
+            preload="metadata"
+            className="size-full object-cover"
+            aria-label={`${active.title} video walkthrough`}
+          >
+            <source src={active.video} type="video/mp4" />
+          </video>
+          <span className="pointer-events-none absolute bottom-3 left-3 font-mono text-xs text-primary-foreground/80 drop-shadow">
             {active.meta}
           </span>
         </div>
