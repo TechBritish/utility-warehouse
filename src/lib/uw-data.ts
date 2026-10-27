@@ -51,7 +51,7 @@ export const trainingModules: TrainingModule[] = [
     description: "Understand how you get paid — and how to talk about it compliantly.",
     status: "locked",
     meta: "📹 18 min video • 🎙️ 5 min practice",
-    video: "/commission_and_earnings.mp4",
+    video: "/bill_savings_and_social_proof.mp4",
     learn: [
       "Read your commission statement with confidence",
       "Explain the earnings model without income promises",
@@ -70,7 +70,7 @@ export const trainingModules: TrainingModule[] = [
       "Show customers where their money goes today, build a like-for-like comparison and use real stories to build trust — without ever promising a number you cannot prove.",
     status: "locked",
     meta: "📹 15 min video • 🎙️ 5 min practice",
-    video: "/bill_savings_and_social_proof.mp4",
+    video: "/commission_and_earnings.mp4",
     learn: [
       "Calculate real customer savings using the UW bundle discount",
       "Handle “too expensive” objections with confidence",

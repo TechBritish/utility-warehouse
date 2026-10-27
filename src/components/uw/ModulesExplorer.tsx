@@ -7,7 +7,6 @@ import {
   Handshake,
   Check,
   Lock,
-  Clock,
   BarChart3,
   Users,
 } from "lucide-react";
@@ -168,10 +167,6 @@ export function ModulesExplorer() {
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
-                <Clock className="size-3.5" aria-hidden="true" />
-                {info.duration}
-              </span>
-              <span className="flex items-center gap-1">
                 <BarChart3 className="size-3.5" aria-hidden="true" />
                 {info.difficulty}
               </span>
@@ -194,9 +189,6 @@ export function ModulesExplorer() {
           >
             <source src={active.video} type="video/mp4" />
           </video>
-          <span className="pointer-events-none absolute bottom-3 left-3 font-mono text-xs text-primary-foreground/80 drop-shadow">
-            {active.meta}
-          </span>
         </div>
 
         {/* What you'll learn */}
