@@ -28,10 +28,8 @@ type VapiMessageEvent = {
   transcript?: string;
 };
 
-export type VapiStartOptions = {
-  firstMessage?: string;
-  variableValues?: Record<string, string>;
-};
+/** Per-call assistant overrides (see Vapi's AssistantOverrides). */
+export type VapiStartOptions = Parameters<VapiInstance["start"]>[1];
 
 /** Vapi's "error" event payload is usually a plain object, not an Error. */
 function describeVapiError(err: unknown): string {

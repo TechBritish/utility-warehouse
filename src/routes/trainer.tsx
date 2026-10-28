@@ -50,6 +50,7 @@ import { useVapi } from "@/hooks/use-vapi";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { fireConfetti } from "@/lib/confetti";
 import { scenarios } from "@/lib/uw-data";
+import { buildTrainerPrompt, voiceSpeed } from "@/lib/trainer-prompt";
 import { usePartnerData } from "@/lib/use-partner-data";
 import { cn } from "@/lib/utils";
 import { RequireAuth } from "@/components/uw/RequireAuth";
@@ -221,7 +222,7 @@ function introLine(scenarioLabel: string, goalMinutes: number) {
     `I'll play a customer for the scenario you picked, ${scenarioLabel}, and you just talk to me out loud, like a real conversation. ` +
     `Your live objectives tick off as you go. Below me you can mute, pause, or switch on push-to-talk, and change scenario from the dropdown. ` +
     `Aim for your ${goalMinutes} minute goal, and your transcripts are in View history and Export. ` +
-    `Say "end session" any time for feedback. Right, I'm your customer now. `
+    `If you get stuck, ask me for help and I'll step out with a quick coaching tip. Say "end session" any time for a summary. Right, I'm your customer now. `
   );
 }
 const scenarioOpeners: Record<string, string> = {
@@ -544,40 +545,83 @@ function Trainer() {
     });
   }
 
-  function vapiStartOptions(scenarioValue = scenario, withIntro = true) {
+  // Everything she does comes from here: the scenario's customer persona,
+  // difficulty, focus, coaching rules (via the system prompt) and voice speed.
+  function vapiStartOptions(
+    scenarioValue = scenario,
+    opening: "intro" | "switch" | "speed" = "intro",
+    speedValue = speed,
+  ) {
     const label = scenarios.find((s) => s.value === scenarioValue)?.label ?? "Customer objections";
     const opener = scenarioOpeners[scenarioValue] ?? defaultOpener;
     // TTS reads "Q&A" as one word, so spell it out for the spoken lines.
     const spoken = label.replace("Q&A", "questions and answers");
-    return {
-      firstMessage: withIntro
+    const firstMessage =
+      opening === "intro"
         ? introLine(spoken, goalMinutes[0] ?? 15) + opener
-        : `Okay, switching to ${spoken}. I'm your customer now. ${opener}`,
+        : opening === "switch"
+          ? `Okay, switching to ${spoken}. I'm a different customer now. ${opener}`
+          : `Sure, I'll talk at that pace. Back to the role-play. ${opener}`;
+    return {
+      firstMessage,
       variableValues: {
         scenario: label,
         level,
         focus: focus.length ? focus.join(", ") : "general practice",
       },
+      model: {
+        provider: "openai" as const,
+        model: "gpt-4.1" as const,
+        temperature: 0.7,
+        messages: [
+          {
+            role: "system" as const,
+            content: buildTrainerPrompt({ scenario: scenarioValue, scenarioLabel: label, level, focus }),
+          },
+        ],
+      },
+      voice: {
+        provider: "11labs" as const,
+        voiceId: "E4IXevHtHpKGh0bvrPPr",
+        model: "eleven_flash_v2" as const,
+        speed: voiceSpeed(speedValue),
+      },
     };
   }
 
+  // Mid-call changes restart the Vapi call with the new settings, since the
+  // prompt and voice are fixed for the life of a call.
+  function restartCall(options: ReturnType<typeof vapiStartOptions>, message: string) {
+    toast(message);
+    switchingRef.current = true;
+    vapi.stop();
+    window.setTimeout(() => {
+      // Reset only now: start() clears the old transcript in the same tick,
+      // so old turns can't be re-synced as new ones.
+      syncedVapiCount.current = 0;
+      void vapi.start(options);
+    }, 600);
+  }
+
   // Switching scenario changes the content, resets objectives and, mid-call,
-  // restarts the role-play as the new scenario (without repeating the intro).
+  // restarts the role-play as the new scenario's customer.
   function changeScenario(value: string) {
     if (value === scenario) return;
     setScenario(value);
     setDone([]);
     if (active && useRealVoiceAi) {
       const label = scenarios.find((s) => s.value === value)?.label ?? value;
-      toast(`Switching to ${label}…`);
-      switchingRef.current = true;
-      vapi.stop();
-      window.setTimeout(() => {
-        // Reset only now: start() clears the old transcript in the same tick,
-        // so old turns can't be re-synced as new ones.
-        syncedVapiCount.current = 0;
-        void vapi.start(vapiStartOptions(value, false));
-      }, 600);
+      restartCall(vapiStartOptions(value, "switch"), `Switching to ${label}…`);
+    }
+  }
+
+  function changeSpeed(value: number) {
+    if (value === speed) return;
+    setSpeed(value);
+    if (active && useRealVoiceAi) {
+      restartCall(vapiStartOptions(scenario, "speed", value), `Coach speed ${value}x`);
+    } else {
+      toast(`Playback speed ${value}x`);
     }
   }
 
@@ -894,7 +938,7 @@ function Trainer() {
                       size="sm"
                       variant="secondary"
                       className="min-h-9 shrink-0 rounded-lg"
-                      onClick={() => void vapi.start(vapiStartOptions())}
+                      onClick={() => void vapi.start(vapiStartOptions(scenario, "switch"))}
                     >
                       Reconnect
                     </Button>
@@ -1079,10 +1123,7 @@ function Trainer() {
                           ? "text-secondary-foreground"
                           : "text-primary-foreground/85 hover:bg-primary-foreground/10 hover:text-primary-foreground",
                       )}
-                      onClick={() => {
-                        setSpeed(s);
-                        toast(`Playback speed ${s}x`);
-                      }}
+                      onClick={() => changeSpeed(s)}
                       aria-pressed={speed === s}
                     >
                       {s}x
