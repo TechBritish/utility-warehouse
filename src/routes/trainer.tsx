@@ -80,7 +80,7 @@ export const Route = createFileRoute("/trainer")({
 });
 
 // Fallback scripted exchange, used only when Vapi credentials are not configured
-// (VITE_VAPI_PUBLIC_KEY / VITE_VAPI_ASSISTANT_ID) so the demo still works offline.
+// (see `@/lib/vapi-config`) so the demo still works offline.
 const script: Omit<TranscriptMessage, "id">[] = [
   {
     who: "ai",
@@ -142,6 +142,16 @@ const scenarioPreview = [
   { who: "ai", text: "It's just easy, I don't want the hassle of switching." },
   { who: "you", text: "That's exactly why people bundle — one bill, one login." },
 ];
+
+// Opening line the role-play customer says, per scenario.
+const defaultOpener = "Oh hiya. Look, I'm happy with my current supplier, thanks.";
+const scenarioOpeners: Record<string, string> = {
+  objections: defaultOpener,
+  product: "Hi! So go on then, what actually is Utility Warehouse?",
+  "first-call": "Hiya, you said you wanted a quick chat? I've only got a few minutes.",
+  closing: "I've had a think about what you said... I'm still not totally sure.",
+  savings: "Alright, so would I actually save money switching to you lot?",
+};
 
 const levelStyles = {
   beginner: "border-success text-success data-[state=checked]:bg-success/15",
@@ -450,8 +460,26 @@ function Trainer() {
     });
   }
 
+  function vapiStartOptions() {
+    const label = scenarios.find((s) => s.value === scenario)?.label ?? "Customer objections";
+    return {
+      firstMessage: scenarioOpeners[scenario] ?? defaultOpener,
+      variableValues: {
+        scenario: label,
+        level,
+        focus: focus.length ? focus.join(", ") : "general practice",
+      },
+    };
+  }
+
   async function startSession() {
-    if (mic.status === "idle") await mic.request();
+    if (mic.status === "idle" || mic.status === "denied") {
+      const granted = await mic.request();
+      if (!granted) {
+        toast.error("Microphone access is needed to practise. Allow it in your browser and try again.");
+        return;
+      }
+    }
     setActive(true);
     setPaused(false);
     setMessages([]);
@@ -459,7 +487,7 @@ function Trainer() {
     setHintDismissed(false);
     if (useRealVoiceAi) {
       syncedVapiCount.current = 0;
-      await vapi.start();
+      await vapi.start(vapiStartOptions());
     }
   }
 
@@ -534,11 +562,11 @@ function Trainer() {
                 <Button
                   variant="secondary"
                   className="min-h-12 rounded-xl"
-                  onClick={() => void mic.request()}
+                  onClick={() => void startSession()}
                   disabled={mic.status === "requesting"}
                 >
                   <Mic className="size-4" />
-                  {mic.status === "requesting" ? "Requesting…" : "Request microphone"}
+                  {mic.status === "requesting" ? "Requesting…" : "Allow microphone & start"}
                 </Button>
                 <span
                   className={cn(
@@ -757,7 +785,7 @@ function Trainer() {
                       size="sm"
                       variant="secondary"
                       className="min-h-9 shrink-0 rounded-lg"
-                      onClick={() => void vapi.start()}
+                      onClick={() => void vapi.start(vapiStartOptions())}
                     >
                       Reconnect
                     </Button>

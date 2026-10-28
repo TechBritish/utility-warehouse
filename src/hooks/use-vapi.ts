@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { VAPI_PUBLIC_KEY, VAPI_TRAINER_ASSISTANT_ID } from "@/lib/vapi-config";
+
 // @vapi-ai/web relies on browser-only APIs (WebRTC/daily-js), so it must
 // never be imported at module scope (that would pull it into the SSR
 // bundle, where it resolves to a broken stub and "Vapi is not a
@@ -26,11 +28,26 @@ type VapiMessageEvent = {
   transcript?: string;
 };
 
+export type VapiStartOptions = {
+  firstMessage?: string;
+  variableValues?: Record<string, string>;
+};
+
+/** Vapi's "error" event payload is usually a plain object, not an Error. */
+function describeVapiError(err: unknown): string {
+  if (err instanceof Error) return err.message;
+  const e = err as { errorMsg?: string; error?: { message?: unknown; msg?: string }; message?: unknown };
+  const msg = e?.errorMsg ?? e?.error?.msg ?? e?.error?.message ?? e?.message;
+  if (Array.isArray(msg)) return msg.join(", ");
+  if (typeof msg === "string" && msg) return msg;
+  return "Vapi call error";
+}
+
 /**
  * Thin wrapper around the Vapi Web SDK that exposes call lifecycle state
  * and final transcript turns in a shape the trainer UI already expects.
  *
- * Requires VITE_VAPI_PUBLIC_KEY and VITE_VAPI_ASSISTANT_ID env vars.
+ * Key and assistant ID come from `@/lib/vapi-config`.
  */
 export function useVapi() {
   const vapiRef = useRef<VapiInstance | null>(null);
@@ -44,11 +61,7 @@ export function useVapi() {
   const readyRef = useRef<Promise<void> | null>(null);
 
   useEffect(() => {
-    const publicKey = import.meta.env.VITE_VAPI_PUBLIC_KEY;
-    if (!publicKey) {
-      setError("Missing VITE_VAPI_PUBLIC_KEY");
-      return;
-    }
+    const publicKey = VAPI_PUBLIC_KEY;
 
     let cancelled = false;
     let cleanup: (() => void) | null = null;
@@ -99,8 +112,9 @@ export function useVapi() {
         }
       };
       const onError = (err: unknown) => {
+        console.error("Vapi error", err);
         setStatus("error");
-        setError(err instanceof Error ? err.message : "Vapi call error");
+        setError(describeVapiError(err));
       };
 
       vapi.on("call-start", onCallStart);
@@ -130,14 +144,10 @@ export function useVapi() {
     };
   }, []);
 
-  const start = useCallback(async () => {
-    const assistantId = import.meta.env.VITE_VAPI_ASSISTANT_ID;
-    if (!assistantId) {
-      setError("Missing VITE_VAPI_ASSISTANT_ID");
-      setStatus("error");
-      return;
-    }
+  const start = useCallback(async (options?: VapiStartOptions) => {
+    const assistantId = VAPI_TRAINER_ASSISTANT_ID;
     setStatus("connecting");
+    setError(null);
     setTranscript([]);
     setPartial(null);
     try {
@@ -145,10 +155,12 @@ export function useVapi() {
       if (!vapiRef.current) {
         throw new Error("Vapi failed to initialize");
       }
-      await vapiRef.current.start(assistantId);
+      const call = await vapiRef.current.start(assistantId, options);
+      // The SDK resolves null (and emits "error") when the call can't be created.
+      if (!call) setStatus((s) => (s === "connecting" ? "error" : s));
     } catch (err) {
       setStatus("error");
-      setError(err instanceof Error ? err.message : "Failed to start call");
+      setError(describeVapiError(err));
     }
   }, []);
 
@@ -161,9 +173,7 @@ export function useVapi() {
     vapiRef.current?.setMuted(muted);
   }, []);
 
-  const isConfigured = Boolean(
-    import.meta.env.VITE_VAPI_PUBLIC_KEY && import.meta.env.VITE_VAPI_ASSISTANT_ID,
-  );
+  const isConfigured = Boolean(VAPI_PUBLIC_KEY && VAPI_TRAINER_ASSISTANT_ID);
 
   return {
     status,

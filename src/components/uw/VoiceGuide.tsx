@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { VOICE_PAGES, buildSiteKnowledge, type VoicePage } from "@/lib/site-knowledge";
+import { VAPI_GUIDE_ASSISTANT_ID, VAPI_PUBLIC_KEY } from "@/lib/vapi-config";
 
 // @vapi-ai/web is browser-only, so it's imported lazily inside start().
 type VapiInstance = InstanceType<typeof import("@vapi-ai/web").default>;
@@ -79,8 +80,8 @@ export function VoiceGuide() {
   const [lastAction, setLastAction] = useState<string | null>(null);
   const logRef = useRef<HTMLDivElement>(null);
 
-  const publicKey = import.meta.env.VITE_VAPI_PUBLIC_KEY;
-  const assistantId = import.meta.env.VITE_VAPI_ASSISTANT_ID;
+  const publicKey = VAPI_PUBLIC_KEY;
+  const assistantId = VAPI_GUIDE_ASSISTANT_ID;
 
   useEffect(() => {
     logRef.current?.scrollTo({ top: logRef.current.scrollHeight });
@@ -191,7 +192,7 @@ export function VoiceGuide() {
         });
       }
 
-      // Same Vapi assistant as the /trainer page (VITE_VAPI_ASSISTANT_ID), so
+      // Same Vapi assistant as the /trainer page (VAPI_GUIDE_ASSISTANT_ID), so
       // there's a single assistant with the full product/site knowledge and
       // a consistent voice — just with its own first message, system prompt
       // and navigation tools layered on top for this site-guide context.
