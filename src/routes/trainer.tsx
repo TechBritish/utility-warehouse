@@ -126,25 +126,104 @@ const focusAreas = [
   "Answering technical questions",
 ];
 
-const scenarioTips: Record<string, string[]> = {
-  default: [
-    "Listen fully before you respond.",
-    "Acknowledge the concern in their own words.",
-    "Ask one question at a time.",
-    "Never promise specific income or savings.",
-    "Close with a clear next step.",
-  ],
+type ScenarioContent = {
+  preview: { who: "ai" | "you"; text: string }[];
+  tips: string[];
+  objectives: string[];
 };
 
-const scenarioPreview = [
-  { who: "ai", text: "I'm happy with my current supplier, thanks." },
-  { who: "you", text: "Makes sense — what do you like most about them?" },
-  { who: "ai", text: "It's just easy, I don't want the hassle of switching." },
-  { who: "you", text: "That's exactly why people bundle — one bill, one login." },
-];
+const scenarioContent: Record<string, ScenarioContent> = {
+  objections: {
+    preview: [
+      { who: "ai", text: "I'm happy with my current supplier, thanks." },
+      { who: "you", text: "Makes sense — what do you like most about them?" },
+      { who: "ai", text: "It's just easy, I don't want the hassle of switching." },
+      { who: "you", text: "That's exactly why people bundle — one bill, one login." },
+    ],
+    tips: [
+      "Listen fully before you respond.",
+      "Acknowledge the concern in their own words.",
+      "Ask one question at a time.",
+      "Never promise specific income or savings.",
+      "Close with a clear next step.",
+    ],
+    objectives: ["Acknowledge the objection", "Overcoming objections", "Explaining bundles"],
+  },
+  product: {
+    preview: [
+      { who: "ai", text: "So what actually is Utility Warehouse?" },
+      { who: "you", text: "One provider for energy, broadband, mobile and insurance — on one bill." },
+      { who: "ai", text: "And what's this Cashback Card thing?" },
+      { who: "you", text: "You earn cashback when you shop, which comes off your bill." },
+    ],
+    tips: [
+      "Keep answers short, then check they've understood.",
+      "Use plain English, not product jargon.",
+      "If you don't know, say you'll find out.",
+      "Link each feature to what they care about.",
+    ],
+    objectives: ["Explaining bundles", "Answering technical questions", "Checking understanding"],
+  },
+  "first-call": {
+    preview: [
+      { who: "ai", text: "Hiya, you said you wanted a quick chat?" },
+      { who: "you", text: "Thanks for making time! How's everything at home at the moment?" },
+      { who: "ai", text: "Busy, bills keep going up to be honest." },
+      { who: "you", text: "That's really common — can I ask who you're with for energy?" },
+    ],
+    tips: [
+      "Build rapport before you mention UW.",
+      "Ask open questions about their bills and home.",
+      "Let them talk more than you.",
+      "Agree a follow-up before you end the call.",
+    ],
+    objectives: ["Building rapport", "Discovering their needs", "Agreeing a next step"],
+  },
+  closing: {
+    preview: [
+      { who: "ai", text: "I've had a think... I'm still not totally sure." },
+      { who: "you", text: "Totally fair — what's the one thing holding you back?" },
+      { who: "ai", text: "Mainly whether it's worth the switch." },
+      { who: "you", text: "Shall we look at your actual bills together on Thursday?" },
+    ],
+    tips: [
+      "Find the real reason behind the hesitation.",
+      "Summarise what they said they want.",
+      "Ask for the next step directly.",
+      "Offer a specific day and time.",
+    ],
+    objectives: ["Handling hesitation", "Closing confidently", "Agreeing a next step"],
+  },
+  savings: {
+    preview: [
+      { who: "ai", text: "Would I actually save money switching to you?" },
+      { who: "you", text: "Let's find out — roughly what do you pay for energy each month?" },
+      { who: "ai", text: "About £150, plus broadband and two mobiles." },
+      { who: "you", text: "Great, let's put those side by side with a bundle." },
+    ],
+    tips: [
+      "Get their real numbers before comparing.",
+      "Never promise a specific saving.",
+      "Show the whole picture: one bill, cashback, price promise.",
+      "Let them reach the conclusion themselves.",
+    ],
+    objectives: ["Gathering their bills", "Explaining bundles", "No savings promises"],
+  },
+};
 
 // Opening line the role-play customer says, per scenario.
 const defaultOpener = "Oh hiya. Look, I'm happy with my current supplier, thanks.";
+
+/** Spoken intro before the role-play: who she is and how to use the trainer. */
+function introLine(scenarioLabel: string, goalMinutes: number) {
+  return (
+    `Hi, I'm Sammy, your UW practice coach. Quick how-to before we start. ` +
+    `I'll play a customer for the scenario you picked, ${scenarioLabel}, and you just talk to me out loud, like a real conversation. ` +
+    `Your live objectives tick off as you go. Below me you can mute, pause, or switch on push-to-talk, and change scenario from the dropdown. ` +
+    `Aim for your ${goalMinutes} minute goal, and your transcripts are in View history and Export. ` +
+    `Say "end session" any time for feedback. Right, I'm your customer now. `
+  );
+}
 const scenarioOpeners: Record<string, string> = {
   objections: defaultOpener,
   product: "Hi! So go on then, what actually is Utility Warehouse?",
@@ -244,6 +323,9 @@ function Trainer() {
   // Audio
   const mic = useMicAnalyser();
   const vapi = useVapi();
+  // True while a mid-call scenario switch restarts the Vapi call, so the
+  // old call's "ended" doesn't end the session.
+  const switchingRef = useRef(false);
   const useRealVoiceAi = vapi.isConfigured;
   const [vizMode, setVizMode] = useState<VizMode>("bars");
   const [sensitivity, setSensitivity] = useState([1]);
@@ -363,12 +445,14 @@ function Trainer() {
 
   useEffect(() => {
     if (!useRealVoiceAi) return;
-    if (vapi.status === "ended" && active) endSession();
+    if (vapi.status === "active" || vapi.status === "error") switchingRef.current = false;
+    if (vapi.status === "ended" && active && !switchingRef.current) endSession();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [useRealVoiceAi, vapi.status]);
 
   // Objectives auto-check
-  const objectives = focus.length ? focus : ["Overcoming objections", "Explaining bundles"];
+  const content = scenarioContent[scenario] ?? scenarioContent["objections"]!;
+  const objectives = focus.length ? focus : content.objectives;
   useEffect(() => {
     const reached = Math.min(objectives.length, Math.floor(messages.length / 2));
     const next = objectives.slice(0, reached);
@@ -460,16 +544,35 @@ function Trainer() {
     });
   }
 
-  function vapiStartOptions() {
-    const label = scenarios.find((s) => s.value === scenario)?.label ?? "Customer objections";
+  function vapiStartOptions(scenarioValue = scenario, withIntro = true) {
+    const label = scenarios.find((s) => s.value === scenarioValue)?.label ?? "Customer objections";
+    const opener = scenarioOpeners[scenarioValue] ?? defaultOpener;
     return {
-      firstMessage: scenarioOpeners[scenario] ?? defaultOpener,
+      firstMessage: withIntro
+        ? introLine(label, goalMinutes[0] ?? 15) + opener
+        : `Okay, switching to ${label}. I'm your customer now. ${opener}`,
       variableValues: {
         scenario: label,
         level,
         focus: focus.length ? focus.join(", ") : "general practice",
       },
     };
+  }
+
+  // Switching scenario changes the content, resets objectives and, mid-call,
+  // restarts the role-play as the new scenario (without repeating the intro).
+  function changeScenario(value: string) {
+    if (value === scenario) return;
+    setScenario(value);
+    setDone([]);
+    if (active && useRealVoiceAi) {
+      const label = scenarios.find((s) => s.value === value)?.label ?? value;
+      toast(`Switching to ${label}…`);
+      switchingRef.current = true;
+      vapi.stop();
+      syncedVapiCount.current = 0;
+      window.setTimeout(() => void vapi.start(vapiStartOptions(value, false)), 600);
+    }
   }
 
   async function startSession() {
@@ -605,7 +708,7 @@ function Trainer() {
             <div className="mt-4 w-full rounded-2xl bg-card/50 p-6 text-left text-foreground backdrop-blur">
               <h2 className="text-sm font-semibold">What this scenario sounds like</h2>
               <div className="mt-3 space-y-2">
-                {scenarioPreview.map((m, i) => (
+                {content.preview.map((m, i) => (
                   <p
                     key={i}
                     className={cn(
@@ -626,13 +729,13 @@ function Trainer() {
 
             {/* Quick tips */}
             <Collapsible className="mt-4 w-full rounded-2xl bg-card/50 p-6 text-left text-foreground backdrop-blur">
-              <CollapsibleTrigger className="flex min-h-12 w-full items-center justify-between text-sm font-semibold">
+              <CollapsibleTrigger className="group flex min-h-12 w-full cursor-pointer items-center justify-between text-sm font-semibold">
                 Quick tips for this scenario
-                <ChevronDown className="size-4" aria-hidden="true" />
+                <ChevronDown className="size-4 transition-transform group-data-[state=open]:rotate-180" aria-hidden="true" />
               </CollapsibleTrigger>
               <CollapsibleContent className="mt-3 space-y-2">
-                {scenarioTips["default"]!.map((t) => (
-                  <p key={t} className="flex gap-2 text-sm text-muted-foreground">
+                {content.tips.map((t) => (
+                  <p key={t} className="flex gap-2 text-sm text-foreground/85">
                     <Lightbulb className="mt-0.5 size-4 shrink-0 text-gold" aria-hidden="true" />
                     {t}
                   </p>
@@ -646,7 +749,7 @@ function Trainer() {
 
               <div className="mt-4 space-y-2">
                 <label className="text-xs font-medium text-muted-foreground">Scenario</label>
-                <Select value={scenario} onValueChange={setScenario}>
+                <Select value={scenario} onValueChange={changeScenario}>
                   <SelectTrigger aria-label="Practice scenario" className="min-h-12">
                     <SelectValue />
                   </SelectTrigger>
@@ -851,9 +954,9 @@ function Trainer() {
 
               {/* Objectives */}
               <Collapsible defaultOpen className="mt-4 rounded-2xl border border-primary-foreground/15 bg-primary-foreground/8 p-4">
-                <CollapsibleTrigger className="flex min-h-11 w-full items-center justify-between text-sm font-semibold">
+                <CollapsibleTrigger className="group flex min-h-11 w-full cursor-pointer items-center justify-between text-sm font-semibold">
                   Live objectives
-                  <ChevronDown className="size-4" aria-hidden="true" />
+                  <ChevronDown className="size-4 transition-transform group-data-[state=open]:rotate-180" aria-hidden="true" />
                 </CollapsibleTrigger>
                 <CollapsibleContent className="mt-2 space-y-2">
                   {objectives.map((o) => {
@@ -939,7 +1042,7 @@ function Trainer() {
                   {paused ? <Play /> : <Pause />}
                   {paused ? "Resume" : "Pause"}
                 </Button>
-                <Select value={scenario} onValueChange={setScenario}>
+                <Select value={scenario} onValueChange={changeScenario}>
                   <SelectTrigger
                     aria-label="Practice scenario"
                     className="min-h-12 border-primary-foreground/25 bg-transparent text-primary-foreground"
