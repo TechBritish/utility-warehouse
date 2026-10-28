@@ -547,10 +547,12 @@ function Trainer() {
   function vapiStartOptions(scenarioValue = scenario, withIntro = true) {
     const label = scenarios.find((s) => s.value === scenarioValue)?.label ?? "Customer objections";
     const opener = scenarioOpeners[scenarioValue] ?? defaultOpener;
+    // TTS reads "Q&A" as one word, so spell it out for the spoken lines.
+    const spoken = label.replace("Q&A", "questions and answers");
     return {
       firstMessage: withIntro
-        ? introLine(label, goalMinutes[0] ?? 15) + opener
-        : `Okay, switching to ${label}. I'm your customer now. ${opener}`,
+        ? introLine(spoken, goalMinutes[0] ?? 15) + opener
+        : `Okay, switching to ${spoken}. I'm your customer now. ${opener}`,
       variableValues: {
         scenario: label,
         level,
