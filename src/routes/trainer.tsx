@@ -570,8 +570,12 @@ function Trainer() {
       toast(`Switching to ${label}…`);
       switchingRef.current = true;
       vapi.stop();
-      syncedVapiCount.current = 0;
-      window.setTimeout(() => void vapi.start(vapiStartOptions(value, false)), 600);
+      window.setTimeout(() => {
+        // Reset only now: start() clears the old transcript in the same tick,
+        // so old turns can't be re-synced as new ones.
+        syncedVapiCount.current = 0;
+        void vapi.start(vapiStartOptions(value, false));
+      }, 600);
     }
   }
 
@@ -903,9 +907,7 @@ function Trainer() {
                   <div className="mx-auto mt-3 flex max-w-sm items-start gap-2 rounded-xl border border-gold/40 bg-primary-foreground/10 p-3 text-left text-xs">
                     <Lightbulb className="mt-0.5 size-4 shrink-0 text-gold" aria-hidden="true" />
                     <p className="flex-1">
-                      {silence >= 10
-                        ? "Try asking: “What's your biggest concern?” — acknowledge the objection first."
-                        : "Try asking about objections."}
+                      {silence >= 10 ? content.tips[1] : content.tips[0]}
                     </p>
                     <button
                       type="button"
