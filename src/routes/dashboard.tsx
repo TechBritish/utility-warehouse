@@ -37,13 +37,13 @@ import { usePartnerData } from "@/lib/use-partner-data";
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
     meta: [
-      { title: "Your Training Dashboard — UW Partner Coach" },
+      { title: "Your Training Dashboard — Partner Coach" },
       {
         name: "description",
         content:
           "Track module progress, milestones and voice AI practice sessions on your UW Partner onboarding dashboard.",
       },
-      { property: "og:title", content: "Your Training Dashboard — UW Partner Coach" },
+      { property: "og:title", content: "Your Training Dashboard — Partner Coach" },
       {
         property: "og:description",
         content: "Modules, milestones and 24/7 voice AI practice, all in one place.",
@@ -118,7 +118,7 @@ function Dashboard() {
 
   const tourSteps = [
     {
-      title: "Welcome to UW Partner Coach 👋",
+      title: "Welcome to Partner Coach 👋",
       description:
         "This quick tour shows you exactly what to click to complete your training. It takes less than a minute — let's go!",
     },

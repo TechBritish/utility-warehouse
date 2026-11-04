@@ -16,6 +16,7 @@ import { Route as BadgesRouteImport } from './routes/badges'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as GuidelinesRouteImport } from './routes/guidelines'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SessionsRouteImport } from './routes/sessions'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SignupRouteImport } from './routes/signup'
@@ -58,6 +59,11 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SessionsRoute = SessionsRouteImport.update({
   id: '/sessions',
   path: '/sessions',
@@ -97,6 +103,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/guidelines': typeof GuidelinesRoute
   '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
   '/sessions': typeof SessionsRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
@@ -112,6 +119,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/guidelines': typeof GuidelinesRoute
   '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
   '/sessions': typeof SessionsRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
@@ -128,6 +136,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/guidelines': typeof GuidelinesRoute
   '/login': typeof LoginRoute
+  '/privacy': typeof PrivacyRoute
   '/sessions': typeof SessionsRoute
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
@@ -145,6 +154,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/guidelines'
     | '/login'
+    | '/privacy'
     | '/sessions'
     | '/settings'
     | '/signup'
@@ -160,6 +170,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/guidelines'
     | '/login'
+    | '/privacy'
     | '/sessions'
     | '/settings'
     | '/signup'
@@ -175,6 +186,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/guidelines'
     | '/login'
+    | '/privacy'
     | '/sessions'
     | '/settings'
     | '/signup'
@@ -191,6 +203,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   GuidelinesRoute: typeof GuidelinesRoute
   LoginRoute: typeof LoginRoute
+  PrivacyRoute: typeof PrivacyRoute
   SessionsRoute: typeof SessionsRoute
   SettingsRoute: typeof SettingsRoute
   SignupRoute: typeof SignupRoute
@@ -250,6 +263,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sessions': {
       id: '/sessions'
       path: '/sessions'
@@ -303,6 +323,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   GuidelinesRoute: GuidelinesRoute,
   LoginRoute: LoginRoute,
+  PrivacyRoute: PrivacyRoute,
   SessionsRoute: SessionsRoute,
   SettingsRoute: SettingsRoute,
   SignupRoute: SignupRoute,

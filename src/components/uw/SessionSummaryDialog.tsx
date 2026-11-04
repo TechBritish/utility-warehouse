@@ -63,7 +63,7 @@ function shareAchievement(metrics: SessionMetrics) {
     ctx.fillRect(0, 0, 1200, 630);
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 64px system-ui, sans-serif";
-    ctx.fillText("UW Partner Coach", 80, 140);
+    ctx.fillText("Partner Coach", 80, 140);
     ctx.font = "500 40px system-ui, sans-serif";
     ctx.fillText("Practice session complete", 80, 200);
     ctx.font = "bold 96px system-ui, sans-serif";

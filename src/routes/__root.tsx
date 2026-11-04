@@ -81,12 +81,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "UW Partner Coach" },
+      { title: "Partner Coach" },
       {
         name: "description",
         content: "Voice-first AI training for new Utility Warehouse Partners.",
       },
-      { property: "og:title", content: "UW Partner Coach" },
+      { property: "og:title", content: "Partner Coach" },
       {
         property: "og:description",
         content: "Voice-first AI training for new Utility Warehouse Partners.",

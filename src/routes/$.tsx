@@ -9,13 +9,13 @@ import { Input } from "@/components/ui/input";
 export const Route = createFileRoute("/$")({
   head: () => ({
     meta: [
-      { title: "Page not found — UW Partner Coach" },
+      { title: "Page not found — Partner Coach" },
       {
         name: "description",
         content: "The page you're looking for doesn't exist or has been moved.",
       },
       { name: "robots", content: "noindex" },
-      { property: "og:title", content: "Page not found — UW Partner Coach" },
+      { property: "og:title", content: "Page not found — Partner Coach" },
       {
         property: "og:description",
         content: "The page you're looking for doesn't exist or has been moved.",

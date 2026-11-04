@@ -48,13 +48,13 @@ import { RequireAuth } from "@/components/uw/RequireAuth";
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
-      { title: "Admin — Partner Management | UW Partner Coach" },
+      { title: "Admin — Partner Management | Partner Coach" },
       {
         name: "description",
         content:
           "Track partner onboarding progress, practice activity and training completion across your UW team.",
       },
-      { property: "og:title", content: "Admin — Partner Management | UW Partner Coach" },
+      { property: "og:title", content: "Admin — Partner Management | Partner Coach" },
       {
         property: "og:description",
         content:

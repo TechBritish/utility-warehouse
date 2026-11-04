@@ -1,4 +1,4 @@
-// Static content catalog for the UW Partner Coach frontend: module copy,
+// Static content catalog for the Partner Coach frontend: module copy,
 // badge definitions, and scenario labels.
 // Per-user state (module progress, sessions, earned badges) is loaded live
 // from Supabase via `usePartnerData()` — see src/lib/use-partner-data.ts.

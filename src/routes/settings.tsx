@@ -22,9 +22,9 @@ import { getSession, getDisplayName } from "@/lib/auth";
 export const Route = createFileRoute("/settings")({
   head: () => ({
     meta: [
-      { title: "Settings | UW Partner Coach" },
+      { title: "Settings | Partner Coach" },
       { name: "description", content: "Manage your profile, notifications and voice training preferences." },
-      { property: "og:title", content: "Settings | UW Partner Coach" },
+      { property: "og:title", content: "Settings | Partner Coach" },
       { property: "og:description", content: "Manage your profile, notifications and voice training preferences." },
       { name: "robots", content: "noindex" },
     ],

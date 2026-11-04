@@ -20,15 +20,15 @@ import { signUp } from "@/lib/auth";
 export const Route = createFileRoute("/signup")({
   head: () => ({
     meta: [
-      { title: "Create Your Account — UW Partner Coach" },
+      { title: "Create Your Account — Partner Coach" },
       {
         name: "description",
-        content: "Sign up for UW Partner Coach and start your personalized voice AI sales training path.",
+        content: "Sign up for Partner Coach and start your personalized voice AI sales training path.",
       },
-      { property: "og:title", content: "Create Your Account — UW Partner Coach" },
+      { property: "og:title", content: "Create Your Account — Partner Coach" },
       {
         property: "og:description",
-        content: "Create a free UW Partner Coach account in three quick steps.",
+        content: "Create your Partner Coach account in three quick steps.",
       },
     ],
   }),
@@ -61,7 +61,7 @@ const step3Schema = z.object({
     errorMap: () => ({ message: "Please choose an option" }),
   }),
   agree: z.literal(true, {
-    errorMap: () => ({ message: "You must agree to the terms" }),
+    errorMap: () => ({ message: "Please tick the box to continue" }),
   }),
 });
 
@@ -442,14 +442,12 @@ function Step3({
             }}
           />
           <Label htmlFor="agree" className="text-sm font-normal leading-snug text-muted-foreground">
-            I agree to the{" "}
-            <a href="#" target="_blank" rel="noopener" className="text-primary hover:underline">
-              Terms of Service
-            </a>{" "}
-            and{" "}
-            <a href="#" target="_blank" rel="noopener" className="text-primary hover:underline">
-              Privacy Policy
+            I agree that Sheila Gwillam-Winter can store my name, email and training activity
+            to run this portal and support my training, as set out in the{" "}
+            <a href="/privacy" target="_blank" rel="noopener" className="text-primary hover:underline">
+              privacy notice
             </a>
+            . I can ask for my details to be deleted at any time.
           </Label>
         </div>
         {errors.agree ? <p className="text-xs text-destructive">{errors.agree.message}</p> : null}

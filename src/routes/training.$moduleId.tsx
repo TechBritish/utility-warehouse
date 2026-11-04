@@ -50,7 +50,7 @@ import { RequireAuth } from "@/components/uw/RequireAuth";
 export const Route = createFileRoute("/training/$moduleId")({
   head: ({ params }) => {
     const mod = getModule(params.moduleId);
-    const title = mod ? `${mod.title} — UW Partner Coach` : "Module not found — UW Partner Coach";
+    const title = mod ? `${mod.title} — Partner Coach` : "Module not found — Partner Coach";
     const description = mod
       ? mod.description
       : "This training module could not be found.";

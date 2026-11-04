@@ -28,13 +28,13 @@ import aiOrb from "@/assets/ai-orb.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "UW Partner Coach — Voice AI Training for New UW Partners" },
+      { title: "Partner Coach — Voice AI Training for New UW Partners" },
       {
         name: "description",
         content:
           "Practise real customer conversations with a 24/7 voice AI coach. Four foundation modules, instant feedback and progress tracking for UW Partners.",
       },
-      { property: "og:title", content: "UW Partner Coach — Your Personal AI Coach for UW Success" },
+      { property: "og:title", content: "Partner Coach — Your Personal AI Coach for UW Success" },
       {
         property: "og:description",
         content:
@@ -98,7 +98,7 @@ const faqs = [
   },
   {
     q: "How much does the training cost?",
-    a: "The onboarding portal is completely free for all active UW Partners.",
+    a: "There's no charge for the portal. It's exclusive to Partners in John and Sheila's team, so ask Sheila if you'd like access.",
   },
   {
     q: "Will the AI help me earn more?",
@@ -106,7 +106,7 @@ const faqs = [
   },
   {
     q: "Is this run by Utility Warehouse?",
-    a: "No. UW Partner Coach is an independent practice tool for John and Sheila's Partner team. It doesn't replace UW's own training or the official UW Partner Guidelines, which you must always follow.",
+    a: "No. Partner Coach is an independent practice tool for John and Sheila's Partner team. It doesn't replace UW's own training or the official UW Partner Guidelines, which you must always follow.",
   },
   {
     q: "What if I don't like talking to an AI?",
@@ -165,7 +165,7 @@ function Landing() {
                   "Four short foundation modules",
                   "Available 24/7 on any device",
                   "Practise until you're confident",
-                  "Free for active UW Partners",
+                  "Exclusive to Sheila's team",
                 ].map((t) => (
                   <li key={t} className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Check className="size-4 shrink-0 text-success" aria-hidden="true" />
@@ -390,13 +390,16 @@ function Landing() {
               <Link to="/guidelines" className="text-muted-foreground hover:text-foreground">
                 Conversation guide
               </Link>
+              <Link to="/privacy" className="text-muted-foreground hover:text-foreground">
+                Privacy
+              </Link>
               <a href="mailto:john.and.sheila@uw.partners" className="text-muted-foreground hover:text-foreground">
                 Contact John and Sheila
               </a>
             </nav>
           </div>
           <p className="text-xs leading-relaxed text-muted-foreground">
-            UW Partner Coach is an independent training resource for John and Sheila
+            Partner Coach is an independent training resource for John and Sheila
             Gwillam-Winter's UW Partner team, built by British AI Consulting. It is not operated,
             approved or endorsed by Utility Warehouse Limited. "UW" and "Utility Warehouse" are
             used only to describe the services Partners refer.

@@ -21,13 +21,13 @@ import { SiteHeader } from "@/components/uw/SiteHeader";
 export const Route = createFileRoute("/guidelines")({
   head: () => ({
     meta: [
-      { title: "Conversation Guide — UW Partner Coach" },
+      { title: "Conversation Guide — Partner Coach" },
       {
         name: "description",
         content:
           "A practice summary of honest, careful ways to talk about UW, savings and earnings. Always follow UW's official Partner Guidelines.",
       },
-      { property: "og:title", content: "Conversation Guide — UW Partner Coach" },
+      { property: "og:title", content: "Conversation Guide — Partner Coach" },
       {
         property: "og:description",
         content:
@@ -49,7 +49,7 @@ const approved = [
 
 const prohibited = [
   {
-    text: "You'll definitely save £500 a year with UW.",
+    text: "You'll definitely save hundreds a year with UW.",
     reason: "Specific unverified savings claims cannot be guaranteed for every customer.",
   },
   {
@@ -57,7 +57,7 @@ const prohibited = [
     reason: "Universal guarantees are misleading — savings depend on individual circumstances.",
   },
   {
-    text: "You could easily earn £5,000 a month as a Partner.",
+    text: "You could easily earn thousands a month as a Partner.",
     reason: "Never promise income. Earnings vary and are not guaranteed.",
   },
   {
@@ -65,8 +65,8 @@ const prohibited = [
     reason: "Partner earnings depend on ongoing effort and on customers staying with UW. Calling it passive overstates it.",
   },
   {
-    text: "You'll get £200 to £500 for every meeting you book.",
-    reason: "Quoting per-meeting or per-customer sums as typical is an earnings claim. Use UW's own published figures and terms only.",
+    text: "You'll get paid a set amount for every meeting you book.",
+    reason: "Promising money per meeting or per customer is an earnings claim. Leave commission questions to Sheila.",
   },
   {
     text: "We're definitely cheaper than British Gas / EE / Sky.",
@@ -95,7 +95,7 @@ const accordionSections = [
       "Never state or imply a guaranteed income figure.",
       "Never present your own earnings, or anyone else's, as typical for new Partners.",
       "Do not promise earnings timelines (e.g. 'you'll be earning within a month').",
-      "Point earnings questions to UW's official earnings information and commission plan.",
+      "Pass commission and earnings questions to Sheila.",
     ],
     instead: [
       "\"Earnings depend on the customers you sign up and vary from Partner to Partner.\"",

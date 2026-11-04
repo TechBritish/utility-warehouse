@@ -17,7 +17,7 @@ export function VideoDemoDialog({ children }: { children: React.ReactNode }) {
     <Dialog open={open} onOpenChange={setOpen}>
       {children}
       <DialogContent className="max-w-[800px] gap-0 overflow-hidden rounded-3xl border-0 p-0 shadow-lift">
-        <DialogTitle className="sr-only">How UW Partner Coach works</DialogTitle>
+        <DialogTitle className="sr-only">How Partner Coach works</DialogTitle>
         <DialogClose
           aria-label="Close video"
           className="absolute top-4 right-4 z-10 grid size-9 place-items-center rounded-full bg-primary-foreground/15 text-primary-foreground backdrop-blur transition-colors hover:bg-primary-foreground/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"

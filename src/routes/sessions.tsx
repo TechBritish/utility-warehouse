@@ -10,12 +10,12 @@ import { RequireAuth } from "@/components/uw/RequireAuth";
 export const Route = createFileRoute("/sessions")({
   head: () => ({
     meta: [
-      { title: "Practice Session History | UW Partner Coach" },
+      { title: "Practice Session History | Partner Coach" },
       {
         name: "description",
         content: "Review your past AI voice practice sessions, scores and full transcripts.",
       },
-      { property: "og:title", content: "Practice Session History | UW Partner Coach" },
+      { property: "og:title", content: "Practice Session History | Partner Coach" },
       {
         property: "og:description",
         content: "Review your past AI voice practice sessions, scores and full transcripts.",

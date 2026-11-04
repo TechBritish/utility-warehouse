@@ -7,12 +7,12 @@ import { RequireAuth } from "@/components/uw/RequireAuth";
 export const Route = createFileRoute("/badges")({
   head: () => ({
     meta: [
-      { title: "Your Badges | UW Partner Coach" },
+      { title: "Your Badges | Partner Coach" },
       {
         name: "description",
         content: "Track the achievements you've earned and see what to unlock next on your UW partner journey.",
       },
-      { property: "og:title", content: "Your Badges | UW Partner Coach" },
+      { property: "og:title", content: "Your Badges | Partner Coach" },
       {
         property: "og:description",
         content: "Track the achievements you've earned and see what to unlock next on your UW partner journey.",

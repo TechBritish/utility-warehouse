@@ -16,12 +16,12 @@ import { login } from "@/lib/auth";
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
-      { title: "Sign In — UW Partner Coach" },
+      { title: "Sign In — Partner Coach" },
       {
         name: "description",
-        content: "Sign in to your UW Partner Coach account to continue your voice AI sales training.",
+        content: "Sign in to your Partner Coach account to continue your voice AI sales training.",
       },
-      { property: "og:title", content: "Sign In — UW Partner Coach" },
+      { property: "og:title", content: "Sign In — Partner Coach" },
       {
         property: "og:description",
         content: "Sign in to continue your UW Partner training journey.",

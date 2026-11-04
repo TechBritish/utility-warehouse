@@ -31,12 +31,12 @@ import { AppHeader } from "@/components/uw/AppHeader";
 export const Route = createFileRoute("/training/")({
   head: () => ({
     meta: [
-      { title: "Your Training Path — UW Partner Coach" },
+      { title: "Your Training Path — Partner Coach" },
       {
         name: "description",
         content: "Track and complete your UW Partner training modules in sequence to unlock advanced content.",
       },
-      { property: "og:title", content: "Your Training Path — UW Partner Coach" },
+      { property: "og:title", content: "Your Training Path — Partner Coach" },
       {
         property: "og:description",
         content: "Complete modules in sequence to unlock advanced content.",
