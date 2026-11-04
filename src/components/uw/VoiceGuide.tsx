@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "@tanstack/react-router";
-import { Loader2, Mic, MicOff, PhoneOff, X } from "lucide-react";
+import { CalendarCheck, Loader2, LogIn, Mic, MicOff, PhoneOff, PiggyBank, Sparkles, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -63,6 +63,21 @@ const TOOLS = [
   fn("end_call", "End the voice conversation."),
 ];
 
+const AVA_DISMISSED_KEY = "uw-ava-dismissed";
+const SHEILA_BOOKING_URL = "https://partner.uw.co.uk/partner/john-and-sheila-gwillam-winter-854311";
+
+type Intent = "general" | "join" | "save";
+const INTENT_LABELS: Record<Exclude<Intent, "general">, string> = {
+  join: "Tell me about becoming a Partner",
+  save: "I just want lower bills",
+};
+const FIRST_MESSAGES: Record<Intent, string> = {
+  general:
+    "Hi, I'm Ava! Quick one so I point you the right way: are you already a UW Partner, thinking about becoming one, or just after lower bills?",
+  join: "Oh brilliant, you're curious about becoming a Partner. Can I ask what got you looking into it?",
+  save: "Lovely, let's talk bills. Who are you with at the moment for things like energy and broadband?",
+};
+
 export function VoiceGuide() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -71,6 +86,7 @@ export function VoiceGuide() {
 
   const vapiRef = useRef<VapiInstance | null>(null);
   const [open, setOpen] = useState(false);
+  const [nudge, setNudge] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
   const [muted, setMuted] = useState(false);
   const [speaking, setSpeaking] = useState(false);
@@ -88,6 +104,36 @@ export function VoiceGuide() {
   }, [lines, partial]);
 
   useEffect(() => () => vapiRef.current?.stop(), []);
+
+  // Pop Ava open shortly after the page loads, once per browser session,
+  // so visitors see her straight away. Browsers need a tap before the mic
+  // can start, so the call itself starts from the buttons in the panel.
+  useEffect(() => {
+    if (location.pathname.startsWith("/trainer")) return;
+    let dismissed = false;
+    try {
+      dismissed = window.sessionStorage.getItem(AVA_DISMISSED_KEY) === "1";
+    } catch {
+      /* storage unavailable */
+    }
+    if (dismissed) {
+      setNudge(true);
+      return;
+    }
+    const id = window.setTimeout(() => setOpen(true), 900);
+    return () => window.clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const closePanel = () => {
+    setOpen(false);
+    setNudge(true);
+    try {
+      window.sessionStorage.setItem(AVA_DISMISSED_KEY, "1");
+    } catch {
+      /* storage unavailable */
+    }
+  };
 
   const runTool = useCallback(
     async (name: string, args: Record<string, string>): Promise<string> => {
@@ -134,7 +180,7 @@ export function VoiceGuide() {
     [navigate],
   );
 
-  const start = useCallback(async () => {
+  const start = useCallback(async (intent: Intent = "general") => {
     if (!publicKey || !assistantId) {
       toast.error("Voice guide isn't set up yet — the Vapi credentials are missing.");
       return;
@@ -197,12 +243,18 @@ export function VoiceGuide() {
       // a consistent voice — just with its own first message, system prompt
       // and navigation tools layered on top for this site-guide context.
       await vapi.start(assistantId, {
-        firstMessage:
-          "Hi, I'm Ava — think of me as your UW sales trainer. I can tell you how the Partner opportunity works, help you handle a tricky customer question, or get you practising right now. What would help most?",
+        firstMessage: FIRST_MESSAGES[intent],
         model: {
           provider: "openai",
           model: "gpt-4o-mini",
-          messages: [{ role: "system", content: buildSiteKnowledge(pathRef.current) }],
+          messages: [
+            {
+              role: "system",
+              content:
+                buildSiteKnowledge(pathRef.current) +
+                (intent === "general" ? "" : `\n\nThe visitor tapped: "${INTENT_LABELS[intent]}". Follow that path.`),
+            },
+          ],
           tools: TOOLS,
         },
       } as any);
@@ -235,27 +287,50 @@ export function VoiceGuide() {
         >
           <div className="flex items-center justify-between bg-gradient-brand px-4 py-3 text-primary-foreground">
             <div>
-              <p className="text-sm font-bold">Ava · Voice guide</p>
+              <p className="text-sm font-bold">Ava · Your UW guide</p>
               <p className="text-xs opacity-80">
-                {status === "connecting" ? "Connecting…" : active ? (speaking ? "Speaking…" : "Listening…") : "Ask me anything about the site"}
+                {status === "connecting" ? "Connecting…" : active ? (speaking ? "Speaking…" : "Listening…") : "Tap a button and just talk"}
               </p>
             </div>
-            <button aria-label="Close voice guide" onClick={() => setOpen(false)} className="rounded-lg p-1 hover:bg-primary-foreground/15">
+            <button aria-label="Close voice guide" onClick={closePanel} className="rounded-lg p-1 hover:bg-primary-foreground/15">
               <X className="size-4" />
             </button>
           </div>
 
           <div ref={logRef} className="max-h-64 min-h-32 space-y-2 overflow-y-auto px-4 py-3 text-sm">
             {lines.length === 0 && !partial && (
-              <div className="space-y-1 text-muted-foreground">
-                <p>Try saying:</p>
-                <ul className="list-disc space-y-0.5 pl-5 text-xs">
-                  <li>“What's in Module 3?”</li>
-                  <li>“Take me to the guidelines”</li>
-                  <li>“Show me the FAQ”</li>
-                  <li>“Start the tour” · “Switch to dark mode”</li>
-                  <li>“I want to practise a call”</li>
-                </ul>
+              <div className="space-y-3">
+                <p className="text-foreground">
+                  Hi, I'm Ava 👋 Tell me what brings you here and I'll point you the right way.
+                </p>
+                <div className="grid gap-2">
+                  <Button
+                    variant="outline"
+                    className="min-h-11 justify-start rounded-xl text-left"
+                    onClick={() => {
+                      closePanel();
+                      void navigate({ to: "/login" });
+                    }}
+                  >
+                    <LogIn /> I'm already a UW Partner
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="min-h-11 justify-start rounded-xl text-left"
+                    disabled={status === "connecting"}
+                    onClick={() => void start("join")}
+                  >
+                    <Sparkles /> Tell me about becoming a Partner
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="min-h-11 justify-start rounded-xl text-left"
+                    disabled={status === "connecting"}
+                    onClick={() => void start("save")}
+                  >
+                    <PiggyBank /> I just want lower bills
+                  </Button>
+                </div>
               </div>
             )}
             {[...lines, ...(partial ? [partial] : [])].map((l, i) => (
@@ -276,6 +351,15 @@ export function VoiceGuide() {
             <p className="border-t border-border px-4 py-2 text-xs text-muted-foreground">✓ {lastAction}</p>
           )}
 
+          <a
+            href={SHEILA_BOOKING_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 border-t border-border px-4 py-2.5 text-sm font-medium text-primary hover:bg-accent"
+          >
+            <CalendarCheck className="size-4" aria-hidden="true" /> Book a chat with Sheila
+          </a>
+
           <div className="flex items-center gap-2 border-t border-border p-3">
             {active ? (
               <>
@@ -287,23 +371,31 @@ export function VoiceGuide() {
                 </Button>
               </>
             ) : (
-              <Button className="min-h-11 w-full rounded-xl" onClick={start} disabled={status === "connecting"}>
+              <Button className="min-h-11 w-full rounded-xl" onClick={() => void start()} disabled={status === "connecting"}>
                 {status === "connecting" ? <Loader2 className="animate-spin" /> : <Mic />}
-                {status === "connecting" ? "Connecting…" : "Start talking"}
+                {status === "connecting" ? "Connecting…" : "Talk to Ava"}
               </Button>
             )}
           </div>
         </div>
       )}
 
+      {!open && nudge && status === "idle" && (
+        <button
+          onClick={() => setOpen(true)}
+          className="rounded-full bg-card px-4 py-2 text-sm font-medium text-foreground shadow-elevated ring-1 ring-border"
+        >
+          Questions? Talk to Ava
+        </button>
+      )}
       <button
-        onClick={() => {
-          setOpen((o) => !o);
-          if (!open && status === "idle") void start();
-        }}
-        aria-label={open ? "Hide voice guide" : "Talk to the voice guide"}
+        onClick={() => (open ? closePanel() : setOpen(true))}
+        aria-label={open ? "Hide voice guide" : "Talk to Ava"}
         className="relative grid size-14 place-items-center rounded-full bg-gradient-brand text-primary-foreground shadow-elevated transition-transform hover:scale-105"
       >
+        {!open && status === "idle" && (
+          <span aria-hidden className="absolute inset-0 animate-ping rounded-full bg-primary/40 motion-reduce:hidden" />
+        )}
         {active && (
           <span
             aria-hidden
