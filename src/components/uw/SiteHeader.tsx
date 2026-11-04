@@ -1,13 +1,14 @@
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/uw/ThemeToggle";
+import { Mic } from "lucide-react";
 
 
 export function UwLogo({ inverted = false }: { inverted?: boolean }) {
   return (
     <span className="flex items-center gap-2">
-      <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-gradient-brand text-sm font-bold tracking-tight text-primary-foreground">
-        UW
+      <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-gradient-brand text-primary-foreground">
+        <Mic className="size-5" aria-hidden="true" />
       </span>
       <span
         className={
@@ -16,7 +17,7 @@ export function UwLogo({ inverted = false }: { inverted?: boolean }) {
             : "text-sm font-bold tracking-tight text-foreground"
         }
       >
-        Partner Coach
+        UW Partner Coach
       </span>
     </span>
   );
@@ -37,7 +38,7 @@ export function SiteHeader() {
             Modules
           </a>
           <Link to="/guidelines" className="text-sm text-muted-foreground hover:text-foreground">
-            Guidelines
+            Conversation guide
           </Link>
           <Link to="/admin" className="text-sm text-muted-foreground hover:text-foreground">
             Admin

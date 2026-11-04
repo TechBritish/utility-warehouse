@@ -3,7 +3,6 @@ import {
   Mic,
   Clock,
   TrendingUp,
-  Star,
   Play,
   Check,
   ArrowRight,
@@ -21,7 +20,6 @@ import {
 import { SiteHeader, UwLogo } from "@/components/uw/SiteHeader";
 import { Waveform } from "@/components/uw/Waveform";
 import { VideoDemoDialog } from "@/components/uw/VideoDemoDialog";
-import { HeroStats } from "@/components/uw/HeroStats";
 import { ModulesExplorer } from "@/components/uw/ModulesExplorer";
 import { DialogTrigger } from "@/components/ui/dialog";
 import heroPartner from "@/assets/hero-partner.jpg";
@@ -88,26 +86,6 @@ const steps = [
   },
 ];
 
-const testimonials = [
-  {
-    quote:
-      "I was terrified to talk to people about UW. After practising with the AI for a week I signed my first customer — my neighbour. It helped me handle her 'I'm too busy' objection perfectly.",
-    name: "Sarah M.",
-    place: "Birmingham · Partner since 2025",
-  },
-  {
-    quote:
-      "The voice trainer is genius. I practise in my car during lunch breaks. It's like having a personal coach who never gets tired of my questions.",
-    name: "James T.",
-    place: "Manchester",
-  },
-  {
-    quote:
-      "This is the first training platform that actually teaches you how to talk to people, not just what to say.",
-    name: "Priya K.",
-    place: "London",
-  },
-];
 
 const faqs = [
   {
@@ -125,6 +103,10 @@ const faqs = [
   {
     q: "Will the AI help me earn more?",
     a: "The AI helps you practise conversations and build confidence. Your results depend on your effort, your market and how you apply the training.",
+  },
+  {
+    q: "Is this run by Utility Warehouse?",
+    a: "No. UW Partner Coach is an independent practice tool for John and Sheila's Partner team. It doesn't replace UW's own training or the official UW Partner Guidelines, which you must always follow.",
   },
   {
     q: "What if I don't like talking to an AI?",
@@ -155,8 +137,8 @@ function Landing() {
                 Your personal <span className="text-gradient-brand">AI coach</span> for UW success
               </h1>
               <p className="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-                Join thousands of UW Partners building their business with 24/7 voice AI training,
-                proven frameworks and expert support.
+                Practise real customer conversations with a 24/7 voice AI coach, then put it into
+                practice with support from John and Sheila's UW Partner team.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Button asChild size="lg" className="min-h-12 rounded-xl px-6 text-base">
@@ -180,7 +162,7 @@ function Landing() {
               </div>
               <ul className="mt-9 grid gap-3 sm:grid-cols-2">
                 {[
-                  "5,000+ Partners trained",
+                  "Four short foundation modules",
                   "Available 24/7 on any device",
                   "Practise until you're confident",
                   "Free for active UW Partners",
@@ -191,17 +173,6 @@ function Landing() {
                   </li>
                 ))}
               </ul>
-              <div className="mt-6 flex items-center gap-2">
-                <span className="flex" aria-hidden="true">
-                  {[0, 1, 2, 3, 4].map((i) => (
-                    <Star key={i} className="size-4 fill-gold text-gold" />
-                  ))}
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  <span className="font-semibold text-foreground">4.8 / 5</span> from Partner reviews
-                </span>
-              </div>
-              <HeroStats />
             </div>
 
             {/* Hero visual */}
@@ -226,7 +197,7 @@ function Landing() {
               </div>
               <img
                 src={heroPartner}
-                alt="A UW Partner smiling while practising a voice session on her phone in a café"
+                alt="A woman practising a voice session on her phone in a café"
                 width={1024}
                 height={1280}
                 className="absolute bottom-6 left-0 hidden size-32 rounded-3xl border-4 border-background object-cover shadow-lift lg:block"
@@ -338,33 +309,28 @@ function Landing() {
           </div>
         </section>
 
-        {/* Testimonials */}
+        {/* Your mentors */}
         <section className="border-y border-border bg-secondary/50 py-16 sm:py-24">
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
             <h2 className="text-3xl font-bold tracking-tight text-balance sm:text-4xl">
-              Partners who started exactly where you are
+              Real support from real people
             </h2>
-            <div className="mt-10 grid gap-5 md:grid-cols-3">
-              {testimonials.map((t) => (
-                <figure
-                  key={t.name}
-                  className="flex flex-col rounded-2xl border-l-4 border-l-primary bg-card p-6 shadow-card"
-                >
-                  <span className="flex" aria-label="Rated 5 out of 5">
-                    {[0, 1, 2, 3, 4].map((i) => (
-                      <Star key={i} className="size-4 fill-gold text-gold" aria-hidden="true" />
-                    ))}
-                  </span>
-                  <blockquote className="mt-4 flex-1 text-sm leading-relaxed text-foreground">
-                    “{t.quote}”
-                  </blockquote>
-                  <figcaption className="mt-5 text-sm">
-                    <span className="font-semibold">{t.name}</span>
-                    <span className="block text-xs text-muted-foreground">{t.place}</span>
-                  </figcaption>
-                </figure>
+            <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground">
+              The AI coach is for practice. When you're ready for real conversations, you're
+              supported by John and Sheila Gwillam-Winter, UW Partners since 2003.
+            </p>
+            <ul className="mt-8 grid gap-5 md:grid-cols-3">
+              {[
+                { title: "Partners since 2003", body: "More than two decades helping households in Kent and across the UK with their bills." },
+                { title: "Senior Group Leader", body: "John and Sheila support and train their own team of UW Partners." },
+                { title: "Practical help", body: "Questions the AI can't answer go to a real person. Contact details are at the bottom of this page." },
+              ].map((c) => (
+                <li key={c.title} className="rounded-2xl border-l-4 border-l-primary bg-card p-6 shadow-card">
+                  <h3 className="text-base font-semibold">{c.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{c.body}</p>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
         </section>
 
@@ -385,8 +351,9 @@ function Landing() {
               ))}
             </Accordion>
             <p className="mt-8 rounded-2xl bg-secondary p-5 text-xs leading-relaxed text-muted-foreground">
-              UW Partners must follow the Partner Guidelines at all times. Nothing in this training
-              constitutes an income claim or guarantee of results.
+              UW Partners must follow UW's official Partner Guidelines at all times. Nothing on this
+              site is an income claim or a guarantee of results. Earnings vary from Partner to
+              Partner and depend on the customers you introduce.
             </p>
           </div>
         </section>
@@ -413,22 +380,27 @@ function Landing() {
       </main>
 
       <footer className="border-t border-border bg-card">
-        <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 sm:px-6 md:flex-row md:items-center md:justify-between">
-          <UwLogo />
-          <nav aria-label="Footer" className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
-            {[
-              "About UW",
-              "Privacy Policy",
-              "Terms of Use",
-              "Partner Guidelines",
-              "Contact Support",
-            ].map((l) => (
-              <a key={l} href="#" className="text-muted-foreground hover:text-foreground">
-                {l}
+        <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 sm:px-6">
+          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+            <UwLogo />
+            <nav aria-label="Footer" className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+              <a href="https://uw.co.uk" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground">
+                About UW
               </a>
-            ))}
-          </nav>
-          <p className="text-xs text-muted-foreground">Powered by British AI Consulting</p>
+              <Link to="/guidelines" className="text-muted-foreground hover:text-foreground">
+                Conversation guide
+              </Link>
+              <a href="mailto:john.and.sheila@uw.partners" className="text-muted-foreground hover:text-foreground">
+                Contact John and Sheila
+              </a>
+            </nav>
+          </div>
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            UW Partner Coach is an independent training resource for John and Sheila
+            Gwillam-Winter's UW Partner team, built by British AI Consulting. It is not operated,
+            approved or endorsed by Utility Warehouse Limited. "UW" and "Utility Warehouse" are
+            used only to describe the services Partners refer.
+          </p>
         </div>
       </footer>
     </div>

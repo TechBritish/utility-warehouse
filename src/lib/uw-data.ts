@@ -72,11 +72,11 @@ export const trainingModules: TrainingModule[] = [
     meta: "📹 15 min video • 🎙️ 5 min practice",
     video: "/commission_and_earnings.mp4",
     learn: [
-      "Calculate real customer savings using the UW bundle discount",
+      "Walk through a customer's current bills and get them an official UW quote",
       "Handle “too expensive” objections with confidence",
       "Use social proof to build trust",
       "Show a bill comparison in under 60 seconds",
-      "Close with the UW Price Pledge guarantee",
+      "Explain the UW Price Pledge accurately, including who qualifies",
       "Keep every claim compliant and evidence-backed",
     ],
     prerequisite: { id: "2", title: "Module 2: Commission & Earnings" },

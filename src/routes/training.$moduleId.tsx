@@ -111,7 +111,7 @@ const TRANSCRIPT = [
   "00:00 — Welcome back! Today we're covering bill savings and social proof.",
   "00:15 — Let's start with how to calculate a like-for-like comparison.",
   "02:40 — Here's how real customer stories build instant trust.",
-  "05:10 — Finally, how to close with the UW Price Pledge guarantee.",
+  "05:10 — Finally, how to explain the UW Price Pledge accurately.",
 ];
 
 function ModuleDetail() {

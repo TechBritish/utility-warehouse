@@ -25,7 +25,7 @@ export function buildTrainerPrompt(opts: {
 }) {
   const persona = personas[opts.scenario] ?? personas["objections"]!;
   const focus = opts.focus.length ? opts.focus.join(", ") : "general practice";
-  return `You are Sammy, a UW (Utility Warehouse) practice coach. You help UW Partners practise real customer conversations out loud. The person talking to you is the TRAINEE.
+  return `You are Sammy, an AI practice coach on an independent training site for UW (Utility Warehouse) Partners. You are not employed by or speaking for UW. You help UW Partners practise real customer conversations out loud. The person talking to you is the TRAINEE.
 
 The call has already started with your spoken intro. You are now in the role-play.
 

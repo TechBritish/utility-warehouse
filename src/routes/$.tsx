@@ -87,7 +87,7 @@ function NotFoundPage() {
             </Link>
           ))}
           <a
-            href="mailto:support@uw.co.uk"
+            href="mailto:john.and.sheila@uw.partners"
             className="text-sm text-muted-foreground hover:text-foreground"
           >
             Support

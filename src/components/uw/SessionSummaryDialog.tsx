@@ -45,7 +45,7 @@ const progressData = [
 
 const nextTips = [
   "Pause for two beats after an objection before answering.",
-  "Quantify bundle savings with a real example bill.",
+  "Use the customer's own bills and an official UW quote, never a guessed figure.",
   "Always close with a specific next step and time.",
 ];
 
@@ -63,9 +63,9 @@ function shareAchievement(metrics: SessionMetrics) {
     ctx.fillRect(0, 0, 1200, 630);
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 64px system-ui, sans-serif";
-    ctx.fillText("Utility Warehouse", 80, 140);
+    ctx.fillText("UW Partner Coach", 80, 140);
     ctx.font = "500 40px system-ui, sans-serif";
-    ctx.fillText("Partner Coach — practice session complete", 80, 200);
+    ctx.fillText("Practice session complete", 80, 200);
     ctx.font = "bold 96px system-ui, sans-serif";
     ctx.fillText(metrics.durationLabel, 80, 340);
     ctx.font = "500 36px system-ui, sans-serif";

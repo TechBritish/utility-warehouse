@@ -24,7 +24,7 @@ const extras: Record<
   "1": {
     duration: "17 min",
     difficulty: "Beginner",
-    completions: "5,102 completions",
+    completions: "Foundation module",
     takeaways: [
       "A confident, natural opening line for any conversation",
       "The one question that qualifies a prospect in seconds",
@@ -33,7 +33,7 @@ const extras: Record<
   "2": {
     duration: "23 min",
     difficulty: "Beginner",
-    completions: "4,588 completions",
+    completions: "Foundation module",
     takeaways: [
       "A compliant, honest way to talk about earnings",
       "A personal target you can actually hit this month",
@@ -42,16 +42,16 @@ const extras: Record<
   "3": {
     duration: "20 min",
     difficulty: "Intermediate",
-    completions: "3,214 completions",
+    completions: "Foundation module",
     takeaways: [
-      "A 60-second bill comparison that sells itself",
+      "A clear, 60-second walk through their current bills",
       "Your go-to response to 'it's too expensive'",
     ],
   },
   "4": {
     duration: "30 min",
     difficulty: "Intermediate",
-    completions: "1,890 completions",
+    completions: "Foundation module",
     takeaways: [
       "A smooth close that doesn't feel pushy",
       "A referral ask that keeps the door open",
