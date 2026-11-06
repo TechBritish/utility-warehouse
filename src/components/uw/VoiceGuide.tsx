@@ -60,6 +60,12 @@ const TOOLS = [
   fn("start_tour", "Start the dashboard walkthrough tour."),
   fn("toggle_theme", "Switch between light and dark mode."),
   fn("start_practice", "Open the Voice AI trainer to practise a conversation."),
+  fn(
+    "scroll_page",
+    "Scroll the current page up, down, to the top or to the bottom.",
+    { direction: { type: "string", enum: ["up", "down", "top", "bottom"] } },
+    ["direction"],
+  ),
   fn("end_call", "End the voice conversation."),
 ];
 
@@ -170,6 +176,14 @@ export function VoiceGuide() {
         case "start_practice":
           await navigate({ to: "/trainer" });
           return "Opened the Voice AI trainer.";
+        case "scroll_page": {
+          const dir = args.direction ?? "down";
+          const step = Math.round(window.innerHeight * 0.75);
+          if (dir === "top") window.scrollTo({ top: 0, behavior: "smooth" });
+          else if (dir === "bottom") window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "smooth" });
+          else window.scrollBy({ top: dir === "up" ? -step : step, behavior: "smooth" });
+          return `Scrolled ${dir}.`;
+        }
         case "end_call":
           window.setTimeout(() => vapiRef.current?.stop(), 1500);
           return "Ending the call.";
