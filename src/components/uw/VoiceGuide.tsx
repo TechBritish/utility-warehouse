@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "@tanstack/react-router";
-import { CalendarCheck, Loader2, LogIn, Mic, MicOff, PhoneOff, PiggyBank, Sparkles, X } from "lucide-react";
+import { CalendarCheck, LifeBuoy, Loader2, LogIn, Mic, MicOff, PhoneOff, PiggyBank, Sparkles, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -72,16 +72,18 @@ const TOOLS = [
 const AVA_DISMISSED_KEY = "uw-ava-dismissed";
 const SHEILA_BOOKING_URL = "https://partner.uw.co.uk/partner/john-and-sheila-gwillam-winter-854311";
 
-type Intent = "general" | "join" | "save";
+type Intent = "general" | "join" | "save" | "help";
 const INTENT_LABELS: Record<Exclude<Intent, "general">, string> = {
   join: "Tell me about becoming a Partner",
   save: "I just want lower bills",
+  help: "Help signing in or a tech problem",
 };
 const FIRST_MESSAGES: Record<Intent, string> = {
   general:
     "Hi, I'm Ava! Quick one so I point you the right way: are you already a UW Partner, thinking about becoming one, or just after lower bills?",
   join: "Oh brilliant, you're curious about becoming a Partner. Can I ask what got you looking into it?",
   save: "Lovely, let's talk bills. Who are you with at the moment for things like energy and broadband?",
+  help: "No worries, I'll help you sort it. What's going on, is it signing in or something else not working?",
 };
 
 export function VoiceGuide() {
@@ -343,6 +345,14 @@ export function VoiceGuide() {
                     onClick={() => void start("save")}
                   >
                     <PiggyBank /> I just want lower bills
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="min-h-11 justify-start rounded-xl text-left"
+                    disabled={status === "connecting"}
+                    onClick={() => void start("help")}
+                  >
+                    <LifeBuoy /> Help signing in or a tech problem
                   </Button>
                 </div>
               </div>
