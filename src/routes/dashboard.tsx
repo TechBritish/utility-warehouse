@@ -189,7 +189,11 @@ function Dashboard() {
               Welcome back, {firstName} 👋
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              You're on the Fast-Track path. Nice pace.
+              {stats.overallPercent === 0
+                ? "Let's get you started. Tap Start training below."
+                : stats.overallPercent === 100
+                  ? "Training complete. Brilliant work!"
+                  : `You're ${stats.overallPercent}% through your training. Keep going!`}
             </p>
 
             <div className="mt-6 flex justify-center">
