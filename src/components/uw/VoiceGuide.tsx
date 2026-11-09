@@ -57,6 +57,7 @@ const TOOLS = [
   ),
   fn("scroll_to", "Scroll to and highlight a section by its id.", { id: { type: "string" } }, ["id"]),
   fn("highlight", "Point out a named button or area.", { target: { type: "string" } }, ["target"]),
+  fn("start_tour", "Start the dashboard walkthrough tour."),
   fn("toggle_theme", "Switch between light and dark mode."),
   fn("start_practice", "Open the Voice AI trainer to practise a conversation."),
   fn(
@@ -166,6 +167,11 @@ export function VoiceGuide() {
           const el = sel ? await waitFor(sel) : null;
           return flash(el) ? `Highlighted ${args.target}.` : `Couldn't find ${args.target} here.`;
         }
+        case "start_tour":
+          window.localStorage.setItem("uw-onboarding-tour", "pending");
+          await navigate({ to: "/dashboard" });
+          window.dispatchEvent(new Event("uw:start-tour"));
+          return "Tour started on the dashboard.";
         case "toggle_theme":
           window.dispatchEvent(new Event("uw:toggle-theme"));
           return "Theme switched.";

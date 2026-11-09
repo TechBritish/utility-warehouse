@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight, Check, Lock, Mic } from "lucide-react";
 import { toast } from "sonner";
@@ -67,9 +67,21 @@ function Step({
 function ModuleDetail() {
   const { moduleId } = Route.useParams();
   const navigate = useNavigate();
-  const { loading, modules, stats, completeModule } = usePartnerData();
+  const { loading, modules, stats, moduleSteps, modulePercent, markStep, completeModule } = usePartnerData();
   const mod = modules.find((m) => m.id === moduleId) ?? getModule(moduleId);
   const [saving, setSaving] = useState(false);
+  const readEndRef = useRef<HTMLDivElement>(null);
+
+  // Reaching the end of the key points counts as reading them.
+  useEffect(() => {
+    const el = readEndRef.current;
+    if (!el || loading) return;
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0]?.isIntersecting) void markStep(moduleId, "read");
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [moduleId, loading, markStep]);
 
   if (!mod) {
     return (
@@ -79,7 +91,7 @@ function ModuleDetail() {
           <h1 className="text-2xl font-bold">Module not found</h1>
           <p className="mt-2 text-sm text-muted-foreground">We couldn't find that training module.</p>
           <Button asChild className="mt-6 min-h-12 rounded-xl">
-            <Link to="/dashboard">Back to my training</Link>
+            <Link to="/dashboard">Back to dashboard</Link>
           </Button>
         </div>
       </div>
@@ -89,7 +101,8 @@ function ModuleDetail() {
   const nextModule = modules.find((m) => m.number === mod.number + 1);
   const isCompleted = mod.status === "completed";
   const isLocked = !loading && mod.status === "locked";
-  const percent = Math.round((stats.modulesCompleted / stats.totalModules) * 100);
+  const stepsDone = moduleSteps(mod.id);
+  const thisPercent = modulePercent(mod.id);
 
   const handleComplete = async () => {
     setSaving(true);
@@ -113,21 +126,28 @@ function ModuleDetail() {
         <Button asChild variant="ghost" className="min-h-11 rounded-xl px-2">
           <Link to="/dashboard">
             <ArrowLeft className="size-4" aria-hidden="true" />
-            My training
+            Dashboard
           </Link>
         </Button>
 
-        <div className="mt-4">
-          <div className="flex items-center justify-between gap-3 text-sm text-muted-foreground">
-            <span className="font-semibold text-foreground">
-              Module {mod.number} of {stats.totalModules}
-            </span>
-            <span>
-              {stats.modulesCompleted} of {stats.totalModules} done
-            </span>
+        <Card className="mt-4 space-y-4 p-5">
+          <div>
+            <div className="flex items-center justify-between gap-3 text-sm">
+              <span className="font-semibold">This module</span>
+              <span className="font-semibold text-brand">{thisPercent}%</span>
+            </div>
+            <Progress value={thisPercent} className="mt-2 h-2.5" />
           </div>
-          <Progress value={percent} className="mt-2 h-2" />
-        </div>
+          <div>
+            <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
+              <span>
+                Module {mod.number} of {stats.totalModules} · Overall training
+              </span>
+              <span>{stats.overallPercent}%</span>
+            </div>
+            <Progress value={stats.overallPercent} className="mt-1.5 h-1.5" />
+          </div>
+        </Card>
 
         <h1 className="mt-6 text-3xl font-bold tracking-tight">{mod.shortTitle}</h1>
         <p className="mt-2 text-muted-foreground">{mod.description}</p>
@@ -154,7 +174,7 @@ function ModuleDetail() {
           </Card>
         ) : (
           <div className="mt-8 space-y-5">
-            <Step n={1} title="Watch the intro" done={isCompleted}>
+            <Step n={1} title="Watch the intro" done={stepsDone.includes("video")}>
               <div className="overflow-hidden rounded-2xl bg-gradient-night">
                 <video
                   key={mod.video}
@@ -163,13 +183,19 @@ function ModuleDetail() {
                   preload="metadata"
                   className="mx-auto max-h-[60vh] w-full object-contain"
                   aria-label={`${mod.shortTitle} intro video`}
+                  onEnded={() => void markStep(mod.id, "video")}
+                  onTimeUpdate={(e) => {
+                    const v = e.currentTarget;
+                    if (v.duration && v.currentTime / v.duration > 0.8) void markStep(mod.id, "video");
+                  }}
                 >
                   <source src={mod.video} type="video/mp4" />
                 </video>
               </div>
+              <p className="mt-2 text-xs text-muted-foreground">Ticks off when you've watched it through.</p>
             </Step>
 
-            <Step n={2} title="Read the key points" done={isCompleted}>
+            <Step n={2} title="Read the key points" done={stepsDone.includes("read")}>
               <p className="text-sm font-semibold">By the end you'll be able to:</p>
               <ul className="mt-2 space-y-2">
                 {mod.learn.map((item) => (
@@ -191,9 +217,10 @@ function ModuleDetail() {
                   </div>
                 ))}
               </div>
+              <div ref={readEndRef} aria-hidden="true" />
             </Step>
 
-            <Step n={3} title="Practise it out loud" done={isCompleted}>
+            <Step n={3} title="Practise it out loud" done={stepsDone.includes("practice")}>
               <p className="text-sm text-muted-foreground">
                 Your AI coach plays a customer. Just talk to it like a real conversation.
               </p>
@@ -201,7 +228,11 @@ function ModuleDetail() {
                 Your task: {mod.practiceTask}
               </p>
               <Button asChild variant="outline" className="mt-4 min-h-12 w-full rounded-xl text-base sm:w-auto sm:px-6">
-                <Link to="/trainer" search={{ scenario: mod.practiceScenario, module: mod.id }}>
+                <Link
+                  to="/trainer"
+                  search={{ scenario: mod.practiceScenario, module: mod.id }}
+                  onClick={() => void markStep(mod.id, "practice")}
+                >
                   <Mic aria-hidden="true" />
                   Start practice
                 </Link>
@@ -220,7 +251,7 @@ function ModuleDetail() {
                       <ArrowRight aria-hidden="true" />
                     </Link>
                   ) : (
-                    <Link to="/dashboard">Back to my training</Link>
+                    <Link to="/dashboard">Back to dashboard</Link>
                   )}
                 </Button>
               ) : (

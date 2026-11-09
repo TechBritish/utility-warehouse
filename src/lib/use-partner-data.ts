@@ -2,9 +2,11 @@
 // mock data in `uw-data.ts` for anything that should differ per partner:
 // module progress, practice sessions, and earned badges.
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { supabase } from "@/lib/supabase";
-import { trainingModules, badges as badgeCatalog, scenarios, type TrainingModule } from "@/lib/uw-data";
+import { fireConfetti } from "@/lib/confetti";
+import { trainingModules, badges as badgeCatalog, scenarios, MODULE_STEPS, type ModuleStep, type TrainingModule } from "@/lib/uw-data";
 import type { TranscriptMessage } from "@/components/uw/TranscriptPanel";
 
 export type SessionDisplay = {
@@ -21,7 +23,10 @@ export type SessionDisplay = {
 
 export type BadgeDisplay = (typeof badgeCatalog)[number] & { earned: string | null };
 
-type ModuleStatusMap = Record<string, { status: "completed" | "unlocked" | "locked"; completedAt: string | null }>;
+type ModuleStatusMap = Record<
+  string,
+  { status: "completed" | "unlocked" | "locked"; completedAt: string | null; steps: string[] }
+>;
 
 function formatDuration(totalSeconds: number): string {
   const m = Math.round(totalSeconds / 60);
@@ -52,7 +57,7 @@ export function usePartnerData() {
 
     const [{ data: profile }, { data: progressRows }, { data: sessions }, { data: userBadges }] = await Promise.all([
       supabase.from("profiles").select("created_at").eq("id", uid).maybeSingle(),
-      supabase.from("module_progress").select("module_id, status, completed_at").eq("user_id", uid),
+      supabase.from("module_progress").select("module_id, status, completed_at, steps").eq("user_id", uid),
       supabase
         .from("practice_sessions")
         .select("id, module_id, started_at, duration_seconds, transcript, rating")
@@ -65,10 +70,14 @@ export function usePartnerData() {
 
     const map: ModuleStatusMap = {};
     for (const row of progressRows ?? []) {
-      map[row.module_id] = { status: row.status as "completed" | "unlocked" | "locked", completedAt: row.completed_at };
+      map[row.module_id] = {
+        status: row.status as "completed" | "unlocked" | "locked",
+        completedAt: row.completed_at,
+        steps: row.steps ?? [],
+      };
     }
     // First module defaults to unlocked for every partner, even before any row exists.
-    if (!map["1"]) map["1"] = { status: "unlocked", completedAt: null };
+    if (!map["1"]) map["1"] = { status: "unlocked", completedAt: null, steps: [] };
     setModuleStatus(map);
 
     const now = new Date();
@@ -121,7 +130,22 @@ export function usePartnerData() {
     ? Math.round(sessionRows.reduce((t, s) => t + (Number.parseFloat(s.duration) || 0), 0))
     : 0;
 
+  // Each module counts four points: video, read, practice, then finishing it.
+  const pointsPerModule = MODULE_STEPS.length + 1;
+  const moduleSteps = (id: string): string[] =>
+    moduleStatus[id]?.status === "completed" ? [...MODULE_STEPS] : (moduleStatus[id]?.steps ?? []);
+  const modulePercent = (id: string): number => {
+    if (moduleStatus[id]?.status === "completed") return 100;
+    const done = MODULE_STEPS.filter((st) => moduleStatus[id]?.steps.includes(st)).length;
+    return Math.round((done / pointsPerModule) * 100);
+  };
+  const overallPercent = Math.round(
+    trainingModules.reduce((t, m) => t + modulePercent(m.id), 0) / trainingModules.length,
+  );
+  const anyStep = (step: ModuleStep) => Object.values(moduleStatus).some((e) => e.steps.includes(step) || e.status === "completed");
+
   const stats = {
+    overallPercent,
     modulesCompleted,
     totalModules: modules.length,
     aiSessionsCount: sessionRows.length,
@@ -143,7 +167,15 @@ export function usePartnerData() {
   const badges: BadgeDisplay[] = badgeCatalog.map((b) => {
     if (earnedBadgeIds[b.id]) return { ...b, earned: new Date(earnedBadgeIds[b.id]).toLocaleDateString("en-GB", { month: "short", day: "numeric", year: "numeric" }) };
     let autoEarned = false;
-    if (b.id === "early-bird" && joinedAt && modules[0]?.status === "completed") {
+    if (b.id === "first-step" && anyStep("video")) {
+      autoEarned = true;
+    } else if (b.id === "first-practice" && (anyStep("practice") || sessionRows.length > 0)) {
+      autoEarned = true;
+    } else if (b.id === "halfway" && modulesCompleted >= 2) {
+      autoEarned = true;
+    } else if (b.id === "fully-trained" && modulesCompleted >= trainingModules.length) {
+      autoEarned = true;
+    } else if (b.id === "early-bird" && joinedAt && modules[0]?.status === "completed") {
       autoEarned = true;
     } else if (b.id === "speed" && modulesCompleted >= 2) {
       autoEarned = true;
@@ -156,6 +188,44 @@ export function usePartnerData() {
     }
     return { ...b, earned: autoEarned ? "Just now" : null };
   });
+
+  // Celebrate badges earned since the last load in this view (not on first load).
+  const earnedKey = badges.filter((b) => b.earned).map((b) => b.id).join(",");
+  const seenBadges = useRef<Set<string> | null>(null);
+  useEffect(() => {
+    if (loading) return;
+    const now = new Set(earnedKey ? earnedKey.split(",") : []);
+    if (seenBadges.current) {
+      for (const id of now) {
+        if (!seenBadges.current.has(id)) {
+          const b = badgeCatalog.find((x) => x.id === id);
+          if (b) {
+            fireConfetti();
+            toast.success(`${b.emoji} Badge unlocked: ${b.title}`, { description: b.how });
+          }
+        }
+      }
+    }
+    seenBadges.current = now;
+  }, [loading, earnedKey]);
+
+  /** Records a step inside a module (watched, read, practised). */
+  const markStep = useCallback(
+    async (moduleId: string, step: ModuleStep) => {
+      if (!userId) return;
+      const entry = moduleStatus[moduleId];
+      if (!entry || entry.status === "completed" || entry.steps.includes(step)) return;
+      const steps = [...entry.steps, step];
+      setModuleStatus((prev) => ({ ...prev, [moduleId]: { ...entry, steps } }));
+      await supabase
+        .from("module_progress")
+        .upsert(
+          { user_id: userId, module_id: moduleId, status: entry.status, steps, updated_at: new Date().toISOString() },
+          { onConflict: "user_id,module_id" },
+        );
+    },
+    [userId, moduleStatus],
+  );
 
   const completeModule = useCallback(
     async (moduleId: string) => {
@@ -190,5 +260,18 @@ export function usePartnerData() {
     [userId, load],
   );
 
-  return { loading, modules, stats, recentActivity, badges, sessions: sessionRows, completeModule, saveSession, refresh: load };
+  return {
+    loading,
+    modules,
+    stats,
+    recentActivity,
+    badges,
+    sessions: sessionRows,
+    moduleSteps,
+    modulePercent,
+    markStep,
+    completeModule,
+    saveSession,
+    refresh: load,
+  };
 }

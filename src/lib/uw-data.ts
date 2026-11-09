@@ -257,6 +257,10 @@ export function getModule(id: string) {
 // field here is always a placeholder — real earned state and dates come from
 // the `user_badges` table and are computed in `usePartnerData()`.
 export const badges = [
+  { id: "first-step", emoji: "🎬", title: "First Step", how: "Watch your first module video", earned: null },
+  { id: "first-practice", emoji: "🗣️", title: "Found Your Voice", how: "Start your first practice with the AI coach", earned: null },
+  { id: "halfway", emoji: "🚀", title: "Halfway There", how: "Complete 2 of the 4 modules", earned: null },
+  { id: "fully-trained", emoji: "🎓", title: "Fully Trained", how: "Complete all 4 modules", earned: null },
   { id: "early-bird", emoji: "🏆", title: "Early Bird", how: "Complete Module 1 in 24 hours", earned: null },
   { id: "speed", emoji: "⚡", title: "Speed Learner", how: "Finish 2 modules in 1 week", earned: null },
   { id: "convo", emoji: "🎙️", title: "Conversationalist", how: "Complete 10+ AI sessions", earned: null },
@@ -272,6 +276,10 @@ export const scenarios = [
   { value: "closing", icon: "🤝", label: "Closing techniques" },
   { value: "savings", icon: "💰", label: "Bill savings walkthrough" },
 ];
+
+/** Steps inside each module; finishing the module is the fourth. */
+export const MODULE_STEPS = ["video", "read", "practice"] as const;
+export type ModuleStep = (typeof MODULE_STEPS)[number];
 
 // Admin dashboard (`/admin`) data types and aggregation live in
 // `use-admin-data.ts`, loaded live from Supabase across all partners.

@@ -679,7 +679,7 @@ function Trainer() {
           ) : (
             <Link to="/dashboard">
               <ArrowLeft />
-              <span className="hidden sm:inline">My training</span>
+              <span className="hidden sm:inline">Dashboard</span>
             </Link>
           )}
         </Button>

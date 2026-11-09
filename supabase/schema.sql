@@ -47,6 +47,8 @@ create table if not exists public.module_progress (
   module_id text not null,
   status text not null default 'locked' check (status in ('locked', 'unlocked', 'completed')),
   completed_at timestamptz,
+  -- Steps done inside the module: 'video', 'read', 'practice'.
+  steps text[] not null default '{}',
   updated_at timestamptz not null default now(),
   unique (user_id, module_id)
 );

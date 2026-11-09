@@ -14,8 +14,10 @@ import { getSession, getDisplayName, getInitials, logout } from "@/lib/auth";
 import { useIsAdmin } from "@/lib/use-admin-data";
 
 const NAV_LINKS = [
-  { to: "/dashboard", label: "My training" },
-  { to: "/trainer", label: "Practice" },
+  { to: "/dashboard", label: "Dashboard", always: true },
+  { to: "/trainer", label: "Practice", always: true },
+  { to: "/sessions", label: "Sessions", always: false },
+  { to: "/badges", label: "Badges", always: false },
 ] as const;
 
 /**
@@ -48,7 +50,7 @@ export function AppHeader() {
             <Link
               key={link.to}
               to={link.to}
-              className="text-sm text-muted-foreground hover:text-foreground [&.active]:font-semibold [&.active]:text-foreground"
+              className={`text-sm text-muted-foreground hover:text-foreground [&.active]:font-semibold [&.active]:text-foreground ${link.always ? "" : "hidden md:inline"}`}
             >
               {link.label}
             </Link>
@@ -76,9 +78,18 @@ export function AppHeader() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => navigate({ to: "/dashboard" })}>My training</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate({ to: "/dashboard" })}>Dashboard</DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate({ to: "/sessions" })}>Past practice sessions</DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate({ to: "/badges" })}>Badges</DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={async () => {
+                  window.localStorage.setItem("uw-onboarding-tour", "pending");
+                  await navigate({ to: "/dashboard" });
+                  window.dispatchEvent(new Event("uw:start-tour"));
+                }}
+              >
+                Replay the tour
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate({ to: "/settings" })}>Settings</DropdownMenuItem>
               <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
             </DropdownMenuContent>
