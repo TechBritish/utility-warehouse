@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { UwLogo } from "@/components/uw/SiteHeader";
-import { login } from "@/lib/auth";
+import { isCurrentUserAdmin, login, sendMagicLink, sendPasswordReset } from "@/lib/auth";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -46,6 +46,7 @@ function LoginPage() {
   const {
     register,
     handleSubmit,
+    getValues,
     formState: { errors, isSubmitting },
   } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -59,7 +60,33 @@ function LoginPage() {
       return;
     }
     toast.success("Signed in successfully!");
-    navigate({ to: "/dashboard" });
+    navigate({ to: (await isCurrentUserAdmin()) ? "/admin" : "/dashboard" });
+  };
+
+  // Both links use whatever is in the email box.
+  const emailOrWarn = (): string | null => {
+    const email = getValues("email")?.trim();
+    if (!email || !z.string().email().safeParse(email).success) {
+      toast.error("Enter your email address first");
+      return null;
+    }
+    return email;
+  };
+
+  const onForgotPassword = async () => {
+    const email = emailOrWarn();
+    if (!email) return;
+    const { error } = await sendPasswordReset(email);
+    if (error) toast.error(error);
+    else toast.success("Check your email for a link to reset your password");
+  };
+
+  const onMagicLink = async () => {
+    const email = emailOrWarn();
+    if (!email) return;
+    const { error } = await sendMagicLink(email);
+    if (error) toast.error(error);
+    else toast.success("Check your email for your sign-in link");
   };
 
   return (
@@ -124,9 +151,13 @@ function LoginPage() {
                 Remember me
               </Label>
             </div>
-            <a href="#" className="text-sm text-primary hover:underline">
+            <button
+              type="button"
+              onClick={onForgotPassword}
+              className="text-sm text-primary hover:underline"
+            >
               Forgot password?
-            </a>
+            </button>
           </div>
 
           <Button type="submit" disabled={isSubmitting} className="min-h-12 w-full rounded-xl">
@@ -151,7 +182,7 @@ function LoginPage() {
           type="button"
           variant="outline"
           className="min-h-11 w-full rounded-xl"
-          onClick={() => toast("Check your email for sign-in link")}
+          onClick={onMagicLink}
         >
           Continue with Magic Link
         </Button>

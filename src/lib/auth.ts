@@ -99,6 +99,37 @@ export async function login(email: string, password: string): Promise<{ error: s
   return { error: null };
 }
 
+/** Emails a password-reset link that lands on /reset-password. */
+export async function sendPasswordReset(email: string): Promise<{ error: string | null }> {
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/reset-password`,
+  });
+  return { error: error?.message ?? null };
+}
+
+/** Emails a one-click sign-in link for an existing account. */
+export async function sendMagicLink(email: string): Promise<{ error: string | null }> {
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: { shouldCreateUser: false, emailRedirectTo: `${window.location.origin}/dashboard` },
+  });
+  return { error: error?.message ?? null };
+}
+
+/** Sets a new password for the signed-in (or recovering) user. */
+export async function updatePassword(password: string): Promise<{ error: string | null }> {
+  const { error } = await supabase.auth.updateUser({ password });
+  return { error: error?.message ?? null };
+}
+
+/** True if the signed-in user has is_admin on their profile. */
+export async function isCurrentUserAdmin(): Promise<boolean> {
+  const { data } = await supabase.auth.getUser();
+  if (!data.user) return false;
+  const { data: me } = await supabase.from("profiles").select("is_admin").eq("id", data.user.id).maybeSingle();
+  return !!me?.is_admin;
+}
+
 /** Best-effort display name: explicit name, or derived from the email's local part. */
 export function getDisplayName(session: AuthSession | null): string {
   if (!session) return "Partner";
