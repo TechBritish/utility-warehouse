@@ -180,7 +180,7 @@ function Dashboard() {
                         <Lock className="absolute -right-1 -bottom-1 size-3.5 rounded-full bg-background p-0.5 text-locked" />
                       )}
                     </span>
-                    <span className="line-clamp-2 w-full text-center text-[10px] leading-tight font-medium sm:text-xs">
+                    <span className="line-clamp-2 w-full text-center text-[10px] leading-tight font-medium [overflow-wrap:anywhere] sm:text-xs">
                       {b.title}
                     </span>
                   </button>
