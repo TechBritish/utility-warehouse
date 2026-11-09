@@ -54,8 +54,18 @@ export const Route = createFileRoute("/dashboard")({
 const SHEILA_BOOKING_URL = "https://partner.uw.co.uk/partner/john-and-sheila-gwillam-winter-854311";
 
 const resources = [
-  { icon: ClipboardList, label: "Conversation guide", meta: "Safer ways to talk about UW", to: "/guidelines" },
-  { icon: History, label: "Past practice sessions", meta: "Transcripts and scores", to: "/sessions" },
+  {
+    icon: ClipboardList,
+    label: "Conversation guide",
+    meta: "Safer ways to talk about UW",
+    to: "/guidelines",
+  },
+  {
+    icon: History,
+    label: "Past practice sessions",
+    meta: "Transcripts and scores",
+    to: "/sessions",
+  },
   { icon: Trophy, label: "All badges", meta: "See what you can unlock", to: "/badges" },
 ] as const;
 
@@ -75,7 +85,8 @@ function Dashboard() {
   const continueBtnRef = useRef<HTMLDivElement>(null);
 
   const { enabled: tourEnabled, dismiss } = useOnboardingTour();
-  const { loading, modules, stats, recentActivity, badges, sessions, modulePercent } = usePartnerData();
+  const { loading, modules, stats, recentActivity, badges, sessions, modulePercent } =
+    usePartnerData();
   const [selectedBadge, setSelectedBadge] = useState<(typeof badges)[number] | null>(null);
 
   const displayName = getDisplayName(getSession());
@@ -87,14 +98,17 @@ function Dashboard() {
   const lastSession = sessions[0];
   const upcomingLocked = modules.find((m) => m.status === "locked");
   const statCards = [
-    { icon: Check, label: "Modules completed", value: `${stats.modulesCompleted} / ${stats.totalModules}` },
+    {
+      icon: Check,
+      label: "Modules completed",
+      value: `${stats.modulesCompleted} / ${stats.totalModules}`,
+    },
     { icon: Mic, label: "AI sessions", value: `${stats.aiSessionsCount} total` },
     { icon: Clock, label: "Practice time", value: `${stats.practiceMinutes} minutes` },
     { icon: Trophy, label: "Badges earned", value: `${badgesEarned} / ${badges.length}` },
     { icon: Target, label: "Up next", value: stats.nextModule?.shortTitle ?? "All done 🎉" },
   ];
   const continueModule = modules.find((m) => m.status === "unlocked") ?? stats.nextModule;
-
 
   const tourSteps = [
     {
@@ -138,53 +152,61 @@ function Dashboard() {
     <div className="min-h-dvh bg-secondary/40 pb-24 lg:pb-0">
       <AppHeader />
 
-      <main className="mx-auto grid max-w-6xl gap-5 px-4 py-6 sm:px-6 lg:grid-cols-12 lg:py-10">
-        {/* Left: progress */}
-        <section aria-labelledby="progress-heading" className="space-y-5 lg:col-span-4 lg:order-1">
-          {/* Achievement badges */}
-          <div>
-            <h2 className="mb-3 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
-              Achievements
-            </h2>
-            <TooltipProvider delayDuration={200}>
-              <div className="flex gap-3 overflow-x-auto pb-2 [scrollbar-width:thin]">
-                {badges.map((b) => {
-                  const earned = Boolean(b.earned);
-                  const card = (
-                    <button
-                      type="button"
-                      key={b.id}
-                      onClick={() => setSelectedBadge(b)}
-                      className={
-                        earned
-                          ? "flex w-24 shrink-0 flex-col items-center gap-2 rounded-2xl border border-border bg-card p-3 shadow-card transition-transform duration-150 hover:-translate-y-0.5"
-                          : "flex w-24 shrink-0 flex-col items-center gap-2 rounded-2xl border border-border bg-muted/40 p-3 opacity-60 grayscale transition-transform duration-150 hover:-translate-y-0.5"
-                      }
-                      aria-label={`${b.title}${earned ? "" : " (locked)"}`}
-                    >
-                      <span className="relative text-3xl">
-                        {b.emoji}
-                        {!earned && (
-                          <Lock className="absolute -right-1 -bottom-1 size-3.5 rounded-full bg-background p-0.5 text-locked" />
-                        )}
-                      </span>
-                      <span className="truncate text-center text-xs font-medium">{b.title}</span>
-                    </button>
-                  );
-                  return earned ? (
-                    card
-                  ) : (
-                    <Tooltip key={b.id}>
-                      <TooltipTrigger asChild>{card}</TooltipTrigger>
-                      <TooltipContent>How to unlock: {b.how}</TooltipContent>
-                    </Tooltip>
-                  );
-                })}
-              </div>
-            </TooltipProvider>
-          </div>
+      <main className="mx-auto grid max-w-6xl grid-cols-1 gap-5 px-4 py-6 sm:px-6 lg:grid-cols-12 lg:py-10">
+        {/* Achievement badges, full width */}
+        <section aria-label="Achievements" className="min-w-0 lg:col-span-12">
+          <h2 className="mb-3 text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+            Achievements
+          </h2>
+          <TooltipProvider delayDuration={200}>
+            <div className="grid grid-cols-5 gap-2 lg:grid-cols-10">
+              {badges.map((b) => {
+                const earned = Boolean(b.earned);
+                const card = (
+                  <button
+                    type="button"
+                    key={b.id}
+                    onClick={() => setSelectedBadge(b)}
+                    className={
+                      earned
+                        ? "flex min-w-0 flex-col items-center gap-1.5 rounded-2xl border border-border bg-card p-2 shadow-card transition-transform duration-150 hover:-translate-y-0.5 sm:p-3"
+                        : "flex min-w-0 flex-col items-center gap-1.5 rounded-2xl border border-border bg-muted/40 p-2 opacity-60 grayscale transition-transform duration-150 hover:-translate-y-0.5 sm:p-3"
+                    }
+                    aria-label={`${b.title}${earned ? "" : " (locked)"}`}
+                  >
+                    <span className="relative text-2xl sm:text-3xl">
+                      {b.emoji}
+                      {!earned && (
+                        <Lock className="absolute -right-1 -bottom-1 size-3.5 rounded-full bg-background p-0.5 text-locked" />
+                      )}
+                    </span>
+                    <span className="line-clamp-2 w-full text-center text-[10px] leading-tight font-medium sm:text-xs">
+                      {b.title}
+                    </span>
+                  </button>
+                );
+                return earned ? (
+                  card
+                ) : (
+                  <Tooltip key={b.id}>
+                    <TooltipTrigger asChild>{card}</TooltipTrigger>
+                    <TooltipContent>How to unlock: {b.how}</TooltipContent>
+                  </Tooltip>
+                );
+              })}
+            </div>
+          </TooltipProvider>
+        </section>
 
-          <div ref={progressRingRef} className="rounded-2xl border border-border bg-card p-6 shadow-card">
+        {/* Left: progress */}
+        <section
+          aria-labelledby="progress-heading"
+          className="min-w-0 space-y-5 lg:col-span-4 lg:order-1"
+        >
+          <div
+            ref={progressRingRef}
+            className="rounded-2xl border border-border bg-card p-6 shadow-card"
+          >
             <h1 id="progress-heading" className="text-xl font-bold tracking-tight">
               Welcome back, {firstName} 👋
             </h1>
@@ -230,13 +252,22 @@ function Dashboard() {
         </section>
 
         {/* Middle: what's next */}
-        <section aria-labelledby="next-heading" className="space-y-5 lg:col-span-5 lg:order-2">
-          <h2 id="next-heading" className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+        <section
+          aria-labelledby="next-heading"
+          className="min-w-0 space-y-5 lg:col-span-5 lg:order-2"
+        >
+          <h2
+            id="next-heading"
+            className="text-sm font-semibold tracking-wide text-muted-foreground uppercase"
+          >
             What's next
           </h2>
 
           {stats.nextModule ? (
-            <article ref={nextModuleRef} className="rounded-2xl border border-border bg-card p-6 shadow-card transition-all duration-200 hover:-translate-y-1 hover:shadow-lift">
+            <article
+              ref={nextModuleRef}
+              className="rounded-2xl border border-border bg-card p-6 shadow-card transition-all duration-200 hover:-translate-y-1 hover:shadow-lift"
+            >
               <div className="flex items-start gap-4">
                 <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-gradient-brand text-primary-foreground">
                   <PiggyBank className="size-6" aria-hidden="true" />
@@ -252,7 +283,8 @@ function Dashboard() {
                   </p>
                   <p className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1">
-                      <Play className="size-3.5" aria-hidden="true" /> {stats.nextModule.meta} · Watch, read, practise, done
+                      <Play className="size-3.5" aria-hidden="true" /> {stats.nextModule.meta} ·
+                      Watch, read, practise, done
                     </span>
                   </p>
                   <div className="mt-4">
@@ -271,7 +303,10 @@ function Dashboard() {
               </div>
             </article>
           ) : (
-            <article ref={nextModuleRef} className="rounded-2xl border border-border bg-gradient-night p-6 text-center text-primary-foreground shadow-card">
+            <article
+              ref={nextModuleRef}
+              className="rounded-2xl border border-border bg-gradient-night p-6 text-center text-primary-foreground shadow-card"
+            >
               <p className="text-sm font-semibold">All modules complete 🎉</p>
             </article>
           )}
@@ -303,7 +338,10 @@ function Dashboard() {
             </article>
           )}
 
-          <article ref={aiCardRef} className="relative overflow-hidden rounded-2xl bg-gradient-night p-6 shadow-card">
+          <article
+            ref={aiCardRef}
+            className="relative overflow-hidden rounded-2xl bg-gradient-night p-6 shadow-card"
+          >
             {AI_SESSIONS_COUNT === 0 ? (
               <div className="flex flex-col items-center py-4 text-center">
                 <span className="grid size-16 place-items-center rounded-full bg-brand/20 text-primary-foreground">
@@ -331,7 +369,9 @@ function Dashboard() {
                   Feeling stuck? Ask your coach anything about UW services, objections or openers.
                 </p>
                 <p className="mt-3 font-mono text-xs text-primary-foreground/60">
-                  {lastSession ? `Last session: ${lastSession.date} · ${lastSession.duration}` : "No sessions yet"}
+                  {lastSession
+                    ? `Last session: ${lastSession.date} · ${lastSession.duration}`
+                    : "No sessions yet"}
                 </p>
                 <Button
                   asChild
@@ -370,14 +410,20 @@ function Dashboard() {
                 Nothing yet. Your first steps will show up here.
               </p>
             )}
-            <Link to="/sessions" className="mt-2 inline-block text-sm font-medium text-brand hover:underline">
+            <Link
+              to="/sessions"
+              className="mt-2 inline-block text-sm font-medium text-brand hover:underline"
+            >
               View past practice sessions →
             </Link>
           </div>
         </section>
 
         {/* Right: milestones & resources */}
-        <section aria-labelledby="milestones-heading" className="space-y-5 lg:col-span-3 lg:order-3">
+        <section
+          aria-labelledby="milestones-heading"
+          className="min-w-0 space-y-5 lg:col-span-3 lg:order-3"
+        >
           {/* Quick actions */}
           <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
             <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
@@ -412,8 +458,14 @@ function Dashboard() {
             </div>
           </div>
 
-          <div ref={milestonesRef} className="rounded-2xl border border-border bg-card p-6 shadow-card">
-            <h2 id="milestones-heading" className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+          <div
+            ref={milestonesRef}
+            className="rounded-2xl border border-border bg-card p-6 shadow-card"
+          >
+            <h2
+              id="milestones-heading"
+              className="text-sm font-semibold tracking-wide text-muted-foreground uppercase"
+            >
               Your training path
             </h2>
             <ol className="mt-5 space-y-4">
@@ -423,12 +475,20 @@ function Dashboard() {
                 const inner = (
                   <>
                     <span className="flex items-center justify-between gap-2 text-sm">
-                      <span className={locked ? "flex items-center gap-1.5 text-muted-foreground" : "font-medium"}>
+                      <span
+                        className={
+                          locked ? "flex items-center gap-1.5 text-muted-foreground" : "font-medium"
+                        }
+                      >
                         {locked && <Lock className="size-3 shrink-0" aria-hidden="true" />}
-                        {m.status === "completed" && <Check className="size-3.5 shrink-0 text-success" aria-hidden="true" />}
+                        {m.status === "completed" && (
+                          <Check className="size-3.5 shrink-0 text-success" aria-hidden="true" />
+                        )}
                         {m.number}. {m.shortTitle}
                       </span>
-                      <span className="shrink-0 text-xs text-muted-foreground">{locked ? "Locked" : `${pct}%`}</span>
+                      <span className="shrink-0 text-xs text-muted-foreground">
+                        {locked ? "Locked" : `${pct}%`}
+                      </span>
                     </span>
                     <Progress value={pct} className="mt-1.5 h-1.5" />
                   </>
@@ -480,8 +540,12 @@ function Dashboard() {
                 >
                   <CalendarCheck className="size-4 shrink-0 text-primary" aria-hidden="true" />
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-medium">Book a chat with Sheila</span>
-                    <span className="block text-xs text-muted-foreground">Questions, support, next steps</span>
+                    <span className="block truncate text-sm font-medium">
+                      Book a chat with Sheila
+                    </span>
+                    <span className="block text-xs text-muted-foreground">
+                      Questions, support, next steps
+                    </span>
                   </span>
                 </a>
               </li>
@@ -501,7 +565,10 @@ function Dashboard() {
       </div>
 
       {/* Badge detail dialog */}
-      <Dialog open={Boolean(selectedBadge)} onOpenChange={(open) => !open && setSelectedBadge(null)}>
+      <Dialog
+        open={Boolean(selectedBadge)}
+        onOpenChange={(open) => !open && setSelectedBadge(null)}
+      >
         <DialogContent className="rounded-2xl">
           {selectedBadge && (
             <>
@@ -523,7 +590,6 @@ function Dashboard() {
           )}
         </DialogContent>
       </Dialog>
-
 
       {tourEnabled && <OnboardingTour steps={tourSteps} onFinish={dismiss} />}
     </div>

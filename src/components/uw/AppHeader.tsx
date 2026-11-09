@@ -41,11 +41,11 @@ export function AppHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
-      <div className="mx-auto grid h-16 max-w-6xl grid-cols-[auto_1fr_auto] items-center gap-4 px-4 sm:px-6">
+      <div className="mx-auto grid h-16 max-w-6xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 px-4 sm:gap-4 sm:px-6">
         <Link to="/dashboard" aria-label="Dashboard home" className="min-w-0">
-          <UwLogo />
+          <UwLogo compact />
         </Link>
-        <nav aria-label="Main" className="flex items-center gap-4 sm:gap-5">
+        <nav aria-label="Main" className="flex min-w-0 items-center gap-3 overflow-x-auto sm:gap-5">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.to}
@@ -73,14 +73,20 @@ export function AppHeader() {
                     {initials}
                   </AvatarFallback>
                 </Avatar>
-                <span className="hidden text-sm font-medium sm:inline">{firstName}</span>
+                <span className="hidden text-sm font-medium md:inline">{firstName}</span>
                 <ChevronDown className="size-4 text-muted-foreground" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => navigate({ to: "/dashboard" })}>Dashboard</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate({ to: "/sessions" })}>Past practice sessions</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate({ to: "/badges" })}>Badges</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate({ to: "/dashboard" })}>
+                Dashboard
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate({ to: "/sessions" })}>
+                Past practice sessions
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate({ to: "/badges" })}>
+                Badges
+              </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={async () => {
                   window.localStorage.setItem("uw-onboarding-tour", "pending");
@@ -90,7 +96,9 @@ export function AppHeader() {
               >
                 Replay the tour
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate({ to: "/settings" })}>Settings</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate({ to: "/settings" })}>
+                Settings
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

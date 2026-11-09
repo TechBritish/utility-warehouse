@@ -3,19 +3,24 @@ import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/uw/ThemeToggle";
 import { Mic } from "lucide-react";
 
-
-export function UwLogo({ inverted = false }: { inverted?: boolean }) {
+export function UwLogo({
+  inverted = false,
+  compact = false,
+}: {
+  inverted?: boolean;
+  compact?: boolean;
+}) {
   return (
     <span className="flex items-center gap-2">
       <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-gradient-brand text-primary-foreground">
         <Mic className="size-5" aria-hidden="true" />
       </span>
       <span
-        className={
+        className={`${compact ? "hidden sm:inline " : ""}${
           inverted
             ? "text-sm font-bold tracking-tight text-primary-foreground"
             : "text-sm font-bold tracking-tight text-foreground"
-        }
+        }`}
       >
         Partner Coach
       </span>
@@ -60,4 +65,3 @@ export function SiteHeader() {
     </header>
   );
 }
-
