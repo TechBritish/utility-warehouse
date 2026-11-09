@@ -1,59 +1,22 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import {
-  Check,
-  Play,
-  Mic,
-  FileText,
-  Image as ImageIcon,
-  File as FileIcon,
-  Video,
-  ChevronDown,
-  BookOpen,
-  ClipboardCheck,
-  PiggyBank,
-  Handshake,
-  ArrowLeft,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Lock, Mic } from "lucide-react";
+import { toast } from "sonner";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Card } from "@/components/ui/card";
-import { getModule, scenarios } from "@/lib/uw-data";
+import { Progress } from "@/components/ui/progress";
+import { AppHeader } from "@/components/uw/AppHeader";
+import { RequireAuth } from "@/components/uw/RequireAuth";
+import { getModule } from "@/lib/uw-data";
 import { usePartnerData } from "@/lib/use-partner-data";
 import { fireConfetti } from "@/lib/confetti";
-import { toast } from "sonner";
-import { RequireAuth } from "@/components/uw/RequireAuth";
 
 export const Route = createFileRoute("/training/$moduleId")({
   head: ({ params }) => {
     const mod = getModule(params.moduleId);
     const title = mod ? `${mod.title} — Partner Coach` : "Module not found — Partner Coach";
-    const description = mod
-      ? mod.description
-      : "This training module could not be found.";
+    const description = mod ? mod.description : "This training module could not be found.";
     return {
       meta: [
         { title },
@@ -70,376 +33,216 @@ export const Route = createFileRoute("/training/$moduleId")({
   ),
 });
 
-const MODULE_ICONS: Record<string, typeof PiggyBank> = {
-  "1": BookOpen,
-  "2": ClipboardCheck,
-  "3": PiggyBank,
-  "4": Handshake,
-};
-
-const RESOURCES = [
-  { icon: FileText, title: "Bill Savings Calculator", size: "245 KB" },
-  { icon: ImageIcon, title: "Comparison Chart", size: "1.2 MB" },
-  { icon: FileIcon, title: "Compliance Guidelines", size: "310 KB" },
-  { icon: Video, title: "Bonus Roleplay Clip", size: "18 MB" },
-];
-
-const PRACTICE_QUESTIONS = [
-  {
-    q: "How do you open a conversation about switching providers?",
-    tip: "Lead with curiosity, not a pitch — ask what they currently pay.",
-  },
-  {
-    q: "How do you handle 'I'm happy with my current provider'?",
-    tip: "Acknowledge, then offer a no-obligation comparison.",
-  },
-  {
-    q: "How do you explain the UW Price Pledge?",
-    tip: "Keep it simple: if we can't save you money, we'll tell you.",
-  },
-  {
-    q: "How do you respond to 'switching sounds like a hassle'?",
-    tip: "Reassure them UW handles the entire switch end-to-end.",
-  },
-  {
-    q: "How do you close and ask for the sign-up?",
-    tip: "Ask directly and confidently — silence after the ask works in your favour.",
-  },
-];
-
-const TRANSCRIPT = [
-  "00:00 — Welcome back! Today we're covering bill savings and social proof.",
-  "00:15 — Let's start with how to calculate a like-for-like comparison.",
-  "02:40 — Here's how real customer stories build instant trust.",
-  "05:10 — Finally, how to explain the UW Price Pledge accurately.",
-];
+/** One numbered step on the module page. */
+function Step({
+  n,
+  title,
+  done,
+  children,
+}: {
+  n: number;
+  title: string;
+  done?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <Card className="p-5 sm:p-6">
+      <div className="flex items-center gap-3">
+        <span
+          className={
+            done
+              ? "grid size-9 shrink-0 place-items-center rounded-full bg-success text-success-foreground"
+              : "grid size-9 shrink-0 place-items-center rounded-full bg-gradient-brand text-sm font-bold text-primary-foreground"
+          }
+        >
+          {done ? <Check className="size-5" aria-hidden="true" /> : n}
+        </span>
+        <h2 className="text-lg font-semibold">{title}</h2>
+      </div>
+      <div className="mt-4">{children}</div>
+    </Card>
+  );
+}
 
 function ModuleDetail() {
   const { moduleId } = Route.useParams();
   const navigate = useNavigate();
-  const { modules, completeModule } = usePartnerData();
+  const { loading, modules, stats, completeModule } = usePartnerData();
   const mod = modules.find((m) => m.id === moduleId) ?? getModule(moduleId);
-  const [tab, setTab] = useState("overview");
-  const [showSticky, setShowSticky] = useState(false);
-  const [transcriptOpen, setTranscriptOpen] = useState(false);
-  const [scenario, setScenario] = useState(scenarios[0]?.value ?? "");
-  const headerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = headerRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      (entries) => setShowSticky(!entries[0]?.isIntersecting),
-      { threshold: 0 },
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
+  const [saving, setSaving] = useState(false);
 
   if (!mod) {
     return (
-      <div className="mx-auto flex min-h-dvh max-w-2xl flex-col items-center justify-center px-4 text-center">
-        <h1 className="text-2xl font-bold">Module not found</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          We couldn't find that training module. It may have been moved or renamed.
-        </p>
-        <Button asChild className="mt-6 min-h-11 rounded-xl">
-          <Link to="/training">Back to training</Link>
-        </Button>
+      <div className="min-h-dvh bg-secondary/40">
+        <AppHeader />
+        <div className="mx-auto flex max-w-2xl flex-col items-center px-4 py-20 text-center">
+          <h1 className="text-2xl font-bold">Module not found</h1>
+          <p className="mt-2 text-sm text-muted-foreground">We couldn't find that training module.</p>
+          <Button asChild className="mt-6 min-h-12 rounded-xl">
+            <Link to="/dashboard">Back to my training</Link>
+          </Button>
+        </div>
       </div>
     );
   }
 
-  const Icon = MODULE_ICONS[mod.id] ?? BookOpen;
-  const prevModule = modules.find((m) => m.number === mod.number - 1);
   const nextModule = modules.find((m) => m.number === mod.number + 1);
   const isCompleted = mod.status === "completed";
+  const isLocked = !loading && mod.status === "locked";
+  const percent = Math.round((stats.modulesCompleted / stats.totalModules) * 100);
 
   const handleComplete = async () => {
-    fireConfetti();
-    toast.success("Module completed! 🎉");
+    setSaving(true);
     await completeModule(mod.id);
-    window.setTimeout(() => navigate({ to: "/training" }), 2000);
+    fireConfetti();
+    if (nextModule) {
+      toast.success(`Module ${mod.number} done! On to Module ${nextModule.number}.`);
+      navigate({ to: "/training/$moduleId", params: { moduleId: nextModule.id } });
+      window.scrollTo({ top: 0 });
+    } else {
+      toast.success("That's all four modules done. Brilliant work!");
+      navigate({ to: "/dashboard" });
+    }
+    setSaving(false);
   };
 
   return (
-    <div className="min-h-dvh bg-secondary/40 pb-28 lg:pb-10">
-      {showSticky && (
-        <div className="fixed inset-x-0 top-0 z-50 border-b border-border bg-background/85 backdrop-blur">
-          <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-2 sm:px-6">
-            <span className="truncate text-sm font-semibold">{mod.shortTitle}</span>
-            <span className="shrink-0 text-xs text-muted-foreground">
-              {capitalizeTab(tab)} · {isCompleted ? "✓ Completed" : "0% complete"}
-            </span>
-          </div>
-        </div>
-      )}
-
-      <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:py-10">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link to="/training">Training</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Module {mod.number}</BreadcrumbPage>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>{mod.shortTitle}</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-
-        <Button asChild variant="ghost" className="mt-3 min-h-11 rounded-xl px-2">
-          <Link to="/training">
+    <div className="min-h-dvh bg-secondary/40 pb-16">
+      <AppHeader />
+      <main className="mx-auto max-w-3xl px-4 py-6 sm:px-6 lg:py-10">
+        <Button asChild variant="ghost" className="min-h-11 rounded-xl px-2">
+          <Link to="/dashboard">
             <ArrowLeft className="size-4" aria-hidden="true" />
-            Back to training
+            My training
           </Link>
         </Button>
 
-        <div ref={headerRef} className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
-            <span className="relative grid size-16 shrink-0 place-items-center rounded-2xl bg-gradient-brand text-primary-foreground">
-              <Icon className="size-8" aria-hidden="true" />
-              {isCompleted && (
-                <span className="absolute -right-1 -bottom-1 grid size-6 place-items-center rounded-full bg-success text-success-foreground ring-2 ring-background">
-                  <Check className="size-3.5" aria-hidden="true" />
-                </span>
-              )}
+        <div className="mt-4">
+          <div className="flex items-center justify-between gap-3 text-sm text-muted-foreground">
+            <span className="font-semibold text-foreground">
+              Module {mod.number} of {stats.totalModules}
             </span>
-            <div className="min-w-0">
-              <Badge
-                className={
-                  isCompleted
-                    ? "rounded-full border-0 bg-success/15 text-success hover:bg-success/15"
-                    : "rounded-full border-0 bg-gold/20 text-gold hover:bg-gold/20"
-                }
-              >
-                {isCompleted ? "✓ Completed" : "🔓 Unlocked"}
-              </Badge>
-              <h1 className="mt-1 text-3xl font-bold tracking-tight">{mod.title}</h1>
-              <p className="mt-1 text-sm text-muted-foreground">{mod.meta}</p>
-            </div>
+            <span>
+              {stats.modulesCompleted} of {stats.totalModules} done
+            </span>
           </div>
-          <p className="shrink-0 text-sm font-semibold text-muted-foreground sm:text-right">
-            {isCompleted ? "✓ Completed" : "0% complete"}
-          </p>
+          <Progress value={percent} className="mt-2 h-2" />
         </div>
 
-        <Tabs value={tab} onValueChange={setTab} className="mt-8">
-          <TabsList className="h-auto w-full justify-start gap-6 rounded-none border-b border-border bg-transparent p-0">
-            {[
-              { value: "overview", label: "Overview" },
-              { value: "video", label: "Video" },
-              { value: "practice", label: "Practice" },
-              { value: "resources", label: "Resources" },
-            ].map((t) => (
-              <TabsTrigger
-                key={t.value}
-                value={t.value}
-                className="min-h-11 rounded-none border-b-2 border-transparent bg-transparent px-1 pb-3 text-sm font-medium text-muted-foreground shadow-none data-[state=active]:border-brand data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none"
-              >
-                {t.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+        <h1 className="mt-6 text-3xl font-bold tracking-tight">{mod.shortTitle}</h1>
+        <p className="mt-2 text-muted-foreground">{mod.description}</p>
+        {isCompleted && (
+          <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-success/15 px-3 py-1 text-sm font-medium text-success">
+            <Check className="size-4" aria-hidden="true" /> You've finished this module
+          </p>
+        )}
 
-          <TabsContent value="overview" className="mt-6 space-y-6">
-            <Card className="p-6">
-              <h2 className="text-lg font-semibold">What you'll learn</h2>
-              <ul className="mt-4 space-y-3">
+        {isLocked ? (
+          <Card className="mt-8 p-6 text-center">
+            <Lock className="mx-auto size-8 text-muted-foreground" aria-hidden="true" />
+            <h2 className="mt-3 text-lg font-semibold">Finish the module before this one first</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Modules open one at a time, in order, so everything builds up step by step.
+            </p>
+            {stats.nextModule && (
+              <Button asChild className="mt-5 min-h-12 rounded-xl px-6 text-base">
+                <Link to="/training/$moduleId" params={{ moduleId: stats.nextModule.id }}>
+                  Go to Module {stats.nextModule.number}: {stats.nextModule.shortTitle}
+                </Link>
+              </Button>
+            )}
+          </Card>
+        ) : (
+          <div className="mt-8 space-y-5">
+            <Step n={1} title="Watch the intro" done={isCompleted}>
+              <div className="overflow-hidden rounded-2xl bg-gradient-night">
+                <video
+                  key={mod.video}
+                  controls
+                  playsInline
+                  preload="metadata"
+                  className="mx-auto max-h-[60vh] w-full object-contain"
+                  aria-label={`${mod.shortTitle} intro video`}
+                >
+                  <source src={mod.video} type="video/mp4" />
+                </video>
+              </div>
+            </Step>
+
+            <Step n={2} title="Read the key points" done={isCompleted}>
+              <p className="text-sm font-semibold">By the end you'll be able to:</p>
+              <ul className="mt-2 space-y-2">
                 {mod.learn.map((item) => (
-                  <li key={item} className="flex items-start gap-3 text-sm">
+                  <li key={item} className="flex items-start gap-2 text-sm">
                     <Check className="mt-0.5 size-4 shrink-0 text-success" aria-hidden="true" />
                     <span>{item}</span>
                   </li>
                 ))}
               </ul>
-            </Card>
-
-            <Card className="p-6">
-              <h2 className="text-lg font-semibold">Module content</h2>
-              <div className="prose-uw mt-4 space-y-4 text-sm leading-relaxed text-foreground">
-                <h3 className="text-base font-semibold">Why bill savings matter</h3>
-                <p className="text-muted-foreground">
-                  Most customers have never compared their bundle against the market. Your job
-                  isn't to sell — it's to show them, clearly and honestly, where their money is
-                  going today.
-                </p>
-                <h3 className="text-base font-semibold">Building a like-for-like comparison</h3>
-                <p className="text-muted-foreground">
-                  Always compare equivalent packages: same speed, same channels, same data
-                  allowance. A fair comparison builds trust faster than any script.
-                </p>
-                <ul className="list-disc space-y-1 pl-5 text-muted-foreground">
-                  <li>Ask to see a recent bill, not an estimate</li>
-                  <li>Highlight hidden fees and price-rise clauses</li>
-                  <li>Use the UW Price Pledge as your safety net</li>
-                </ul>
-                <h3 className="text-base font-semibold">Using social proof</h3>
-                <p className="text-muted-foreground">
-                  Real stories from real customers close more conversations than statistics.
-                  Keep two or three recent examples ready to share.
-                </p>
-              </div>
-            </Card>
-
-            {mod.prerequisite && (
-              <Card className="flex flex-col gap-3 p-6 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                    Prerequisite
-                  </h2>
-                  <p className="mt-1 text-sm font-medium">{mod.prerequisite.title}</p>
-                </div>
-                <Button asChild variant="outline" className="min-h-11 rounded-xl">
-                  <Link to="/training/$moduleId" params={{ moduleId: mod.prerequisite.id }}>
-                    View module
-                  </Link>
-                </Button>
-              </Card>
-            )}
-          </TabsContent>
-
-          <TabsContent value="video" className="mt-6 space-y-4">
-            <div className="relative aspect-video overflow-hidden rounded-2xl bg-gradient-night">
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-                <span className="grid size-24 place-items-center rounded-full bg-primary-foreground/10 text-primary-foreground">
-                  <Play className="size-12" aria-hidden="true" />
-                </span>
-                <p className="text-sm text-primary-foreground/75">Video content coming soon</p>
-              </div>
-            </div>
-            <Card className="p-4">
-              <button
-                type="button"
-                onClick={() => setTranscriptOpen((v) => !v)}
-                className="flex min-h-11 w-full items-center justify-between text-left text-sm font-semibold"
-                aria-expanded={transcriptOpen}
-              >
-                Transcript
-                <ChevronDown
-                  className={transcriptOpen ? "size-4 rotate-180 transition-transform" : "size-4 transition-transform"}
-                  aria-hidden="true"
-                />
-              </button>
-              {transcriptOpen && (
-                <ul className="mt-3 space-y-2 border-t border-border pt-3 text-sm text-muted-foreground">
-                  {TRANSCRIPT.map((line) => (
-                    <li key={line}>{line}</li>
-                  ))}
-                </ul>
-              )}
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="practice" className="mt-6 space-y-6">
-            <Card className="p-6 text-center sm:text-left">
-              <div className="flex flex-col items-center gap-4 sm:flex-row">
-                <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-gradient-brand text-primary-foreground">
-                  <Mic className="size-7" aria-hidden="true" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <h2 className="text-lg font-semibold">Practice with your AI coach</h2>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Pick a scenario and rehearse the conversation in a safe space, any time.
-                  </p>
-                </div>
-              </div>
-              <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-                <Select value={scenario} onValueChange={setScenario}>
-                  <SelectTrigger className="min-h-11 flex-1 rounded-xl">
-                    <SelectValue placeholder="Choose a scenario" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {scenarios.map((s) => (
-                      <SelectItem key={s.value} value={s.value}>
-                        {s.icon} {s.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Button asChild className="min-h-12 rounded-xl px-8 text-base">
-                  <Link to="/trainer">Start AI practice</Link>
-                </Button>
-              </div>
-            </Card>
-
-            <Card className="p-6">
-              <h2 className="text-lg font-semibold">Sample practice questions</h2>
-              <Accordion type="single" collapsible className="mt-3">
-                {PRACTICE_QUESTIONS.map((item, i) => (
-                  <AccordionItem key={item.q} value={`q-${i}`}>
-                    <AccordionTrigger className="text-left text-sm font-medium">
-                      {item.q}
-                    </AccordionTrigger>
-                    <AccordionContent className="text-sm text-muted-foreground">
-                      {item.tip}
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="resources" className="mt-6">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {RESOURCES.map((r) => (
-                <Card key={r.title} className="flex items-center gap-4 p-5">
-                  <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-accent text-accent-foreground">
-                    <r.icon className="size-5" aria-hidden="true" />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold">{r.title}</p>
-                    <p className="text-xs text-muted-foreground">{r.size}</p>
+              <div className="mt-6 space-y-5">
+                {mod.sections.map((section) => (
+                  <div key={section.heading}>
+                    <h3 className="text-base font-semibold">{section.heading}</h3>
+                    <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-muted-foreground">
+                      {section.points.map((point) => (
+                        <li key={point}>{point}</li>
+                      ))}
+                    </ul>
                   </div>
-                  <Button
-                    variant="outline"
-                    className="min-h-11 shrink-0 rounded-xl"
-                    onClick={() => toast.success("Download ready!")}
-                  >
-                    Download
-                  </Button>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-        </Tabs>
-      </div>
+                ))}
+              </div>
+            </Step>
 
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 p-3 backdrop-blur lg:static lg:mt-6 lg:border-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-0 sm:px-0 lg:px-6">
-          {prevModule ? (
-            <Button asChild variant="ghost" className="min-h-11 hidden rounded-xl sm:inline-flex">
-              <Link to="/training/$moduleId" params={{ moduleId: prevModule.id }}>
-                ← Previous: Module {prevModule.number}
-              </Link>
-            </Button>
-          ) : (
-            <span />
-          )}
-          <Button onClick={handleComplete} className="min-h-12 flex-1 rounded-xl text-base sm:flex-none sm:px-8">
-            Mark as complete
-          </Button>
-          {nextModule && nextModule.status !== "locked" ? (
-            <Button asChild variant="ghost" className="min-h-11 hidden rounded-xl sm:inline-flex">
-              <Link to="/training/$moduleId" params={{ moduleId: nextModule.id }}>
-                Next: Module {nextModule.number} →
-              </Link>
-            </Button>
-          ) : (
-            <span />
-          )}
-        </div>
-      </div>
+            <Step n={3} title="Practise it out loud" done={isCompleted}>
+              <p className="text-sm text-muted-foreground">
+                Your AI coach plays a customer. Just talk to it like a real conversation.
+              </p>
+              <p className="mt-3 rounded-xl bg-accent p-4 text-sm font-medium text-accent-foreground">
+                Your task: {mod.practiceTask}
+              </p>
+              <Button asChild variant="outline" className="mt-4 min-h-12 w-full rounded-xl text-base sm:w-auto sm:px-6">
+                <Link to="/trainer" search={{ scenario: mod.practiceScenario, module: mod.id }}>
+                  <Mic aria-hidden="true" />
+                  Start practice
+                </Link>
+              </Button>
+              <p className="mt-2 text-xs text-muted-foreground">
+                About 5 minutes. When you're done, come back here to finish the module.
+              </p>
+            </Step>
+
+            <Step n={4} title={isCompleted ? "All done" : "Finish this module"} done={isCompleted}>
+              {isCompleted ? (
+                <Button asChild className="min-h-12 w-full rounded-xl text-base">
+                  {nextModule ? (
+                    <Link to="/training/$moduleId" params={{ moduleId: nextModule.id }}>
+                      Go to Module {nextModule.number}: {nextModule.shortTitle}
+                      <ArrowRight aria-hidden="true" />
+                    </Link>
+                  ) : (
+                    <Link to="/dashboard">Back to my training</Link>
+                  )}
+                </Button>
+              ) : (
+                <>
+                  <p className="text-sm text-muted-foreground">
+                    Watched it, read it and had a go? Tap below to finish
+                    {nextModule ? ` and open Module ${nextModule.number}.` : " your training."}
+                  </p>
+                  <Button
+                    onClick={handleComplete}
+                    disabled={saving}
+                    className="mt-4 min-h-12 w-full rounded-xl text-base"
+                  >
+                    {nextModule ? `Done, take me to Module ${nextModule.number}` : "Done, finish my training"}
+                    <ArrowRight aria-hidden="true" />
+                  </Button>
+                </>
+              )}
+            </Step>
+          </div>
+        )}
+      </main>
     </div>
   );
-}
-
-function capitalizeTab(tab: string) {
-  return tab.charAt(0).toUpperCase() + tab.slice(1);
 }

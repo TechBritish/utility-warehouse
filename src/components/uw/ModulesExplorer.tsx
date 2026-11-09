@@ -224,7 +224,7 @@ export function ModulesExplorer() {
             </Badge>
           ) : (
             <Button asChild size="lg" className="min-h-11 rounded-xl px-6">
-              <Link to="/training">
+              <Link to="/signup">
                 Start this module
               </Link>
             </Button>

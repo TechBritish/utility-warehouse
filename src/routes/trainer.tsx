@@ -56,6 +56,13 @@ import { cn } from "@/lib/utils";
 import { RequireAuth } from "@/components/uw/RequireAuth";
 
 export const Route = createFileRoute("/trainer")({
+  // Opened from a module's practice step: preselects its scenario and links back.
+  validateSearch: (search: Record<string, unknown>): { scenario?: string; module?: string } => ({
+    ...(typeof search.scenario === "string" && scenarios.some((s) => s.value === search.scenario)
+      ? { scenario: search.scenario }
+      : {}),
+    ...(typeof search.module === "string" ? { module: search.module } : {}),
+  }),
   head: () => ({
     meta: [
       { title: "Voice AI Trainer — Practise UW Conversations" },
@@ -315,8 +322,10 @@ function Trainer() {
   const isMobile = useIsMobile();
   const { saveSession } = usePartnerData();
 
+  const fromModule = Route.useSearch();
+
   // Pre-session config
-  const [scenario, setScenario] = useState("objections");
+  const [scenario, setScenario] = useState(fromModule.scenario ?? "objections");
   const [level, setLevel] = useState<"beginner" | "intermediate" | "advanced">("intermediate");
   const [goalMinutes, setGoalMinutes] = useState([15]);
   const [focus, setFocus] = useState<string[]>([]);
@@ -662,10 +671,17 @@ function Trainer() {
           size="sm"
           className="min-h-12 text-primary-foreground/80 hover:bg-primary-foreground/10 hover:text-primary-foreground"
         >
-          <Link to="/dashboard">
-            <ArrowLeft />
-            <span className="hidden sm:inline">Dashboard</span>
-          </Link>
+          {fromModule.module ? (
+            <Link to="/training/$moduleId" params={{ moduleId: fromModule.module }}>
+              <ArrowLeft />
+              <span className="hidden sm:inline">Back to Module {fromModule.module}</span>
+            </Link>
+          ) : (
+            <Link to="/dashboard">
+              <ArrowLeft />
+              <span className="hidden sm:inline">My training</span>
+            </Link>
+          )}
         </Button>
         <p className="text-center font-mono text-sm text-primary-foreground/80">
           {formatTime(seconds)}

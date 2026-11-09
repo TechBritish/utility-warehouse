@@ -142,7 +142,7 @@ function Landing() {
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Button asChild size="lg" className="min-h-12 rounded-xl px-6 text-base">
-                  <Link to="/trainer">
+                  <Link to="/signup">
                     Start your training
                     <ArrowRight />
                   </Link>
@@ -300,9 +300,9 @@ function Landing() {
                 ))}
               </ul>
               <Button asChild size="lg" className="mt-8 min-h-12 rounded-xl px-6">
-                <Link to="/trainer">
+                <Link to="/signup">
                   <Mic />
-                  Try a free practice session
+                  Start free training
                 </Link>
               </Button>
             </div>
@@ -370,7 +370,7 @@ function Landing() {
               variant="secondary"
               className="mt-8 min-h-12 rounded-xl px-8 text-base"
             >
-              <Link to="/trainer">
+              <Link to="/signup">
                 <Mic />
                 Start your training
               </Link>

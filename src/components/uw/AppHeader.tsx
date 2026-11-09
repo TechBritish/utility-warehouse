@@ -1,4 +1,4 @@
-import { Bell, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 
 import { Button } from "@/components/ui/button";
@@ -14,11 +14,8 @@ import { getSession, getDisplayName, getInitials, logout } from "@/lib/auth";
 import { useIsAdmin } from "@/lib/use-admin-data";
 
 const NAV_LINKS = [
-  { to: "/dashboard", label: "Dashboard" },
-  { to: "/training", label: "Training" },
+  { to: "/dashboard", label: "My training" },
   { to: "/trainer", label: "Practice" },
-  { to: "/sessions", label: "Sessions" },
-  { to: "/badges", label: "Badges" },
 ] as const;
 
 /**
@@ -46,7 +43,7 @@ export function AppHeader() {
         <Link to="/dashboard" aria-label="Dashboard home" className="min-w-0">
           <UwLogo />
         </Link>
-        <nav aria-label="Main" className="hidden items-center gap-5 md:flex">
+        <nav aria-label="Main" className="flex items-center gap-4 sm:gap-5">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.to}
@@ -66,9 +63,6 @@ export function AppHeader() {
           )}
         </nav>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" aria-label="Notifications" className="min-h-11 min-w-11">
-            <Bell />
-          </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="min-h-11 gap-2 px-2">
@@ -82,7 +76,9 @@ export function AppHeader() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => navigate({ to: "/dashboard" })}>Dashboard</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate({ to: "/dashboard" })}>My training</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate({ to: "/sessions" })}>Past practice sessions</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate({ to: "/badges" })}>Badges</DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate({ to: "/settings" })}>Settings</DropdownMenuItem>
               <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
             </DropdownMenuContent>

@@ -146,7 +146,6 @@ function SignupPage() {
                   toast.error(error);
                   return;
                 }
-                localStorage.setItem("uw-onboarding-tour", "pending");
                 fireConfetti();
                 toast.success("Welcome aboard!");
                 navigate({ to: "/dashboard" });
