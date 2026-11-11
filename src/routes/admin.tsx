@@ -45,6 +45,7 @@ import {
 import { useAdminData, type AdminPartner, type PartnerStatus } from "@/lib/use-admin-data";
 import { RequireAuth } from "@/components/uw/RequireAuth";
 import { WebsiteTraffic } from "@/components/uw/WebsiteTraffic";
+import { LeadsPanel } from "@/components/uw/LeadsPanel";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -199,6 +200,7 @@ function AdminPage() {
           ))}
         </div>
 
+        <LeadsPanel />
         <WebsiteTraffic />
 
         {/* Charts */}

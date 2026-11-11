@@ -58,11 +58,31 @@ const sections: { title: string; body: React.ReactNode }[] = [
           tablet or computer, so we can see how the site is used and improve it.
         </p>
         <p className="mt-2">
-          If you choose "Accept" on the cookie banner, we also store a random ID in your browser so we
-          can count returning visitors. If you choose "No thanks", no ID is stored. You can change your
-          mind any time by clearing this site's data in your browser.
+          If you choose "Accept all" or "Analytics only" on the cookie banner, we also store a random
+          ID in your browser so we can count returning visitors. If you choose "No thanks", no ID is
+          stored.
+        </p>
+        <p className="mt-2">
+          If you choose "Accept all", we also load marketing tags from Meta (Facebook and Instagram)
+          and Google. These let us measure our adverts and show our adverts to people who have
+          visited the site. Meta and Google may use their own cookies for this under their own
+          privacy policies. We don't receive your name or contact details from them.
+        </p>
+        <p className="mt-2">
+          You can change your mind any time by clearing this site's data in your browser; the banner
+          will then ask again.
         </p>
       </>
+    ),
+  },
+  {
+    title: "Free bill check requests",
+    body: (
+      <p>
+        If you fill in the free bill check form, we keep your name, phone number and/or email, what
+        you're interested in and any message, so Sheila can contact you about it. We only contact
+        you because you asked us to, and you can ask us to delete your details at any time.
+      </p>
     ),
   },
   {
@@ -105,12 +125,12 @@ const sections: { title: string; body: React.ReactNode }[] = [
         <p>
           We use trusted service providers to run the site: Vercel (website hosting), Supabase
           (accounts and database) and Vapi with its AI and voice partners (voice conversations).
-          They process information only to provide their service to us.
+          They process information only to provide their service to us. If you accept marketing
+          cookies, Meta and Google also receive information about your visit (see above).
         </p>
         <p>
           Some of these providers may process information outside the UK, using the safeguards
-          required by UK data protection law. We don't sell your information or use it for
-          advertising.
+          required by UK data protection law. We never sell your information.
         </p>
       </>
     ),

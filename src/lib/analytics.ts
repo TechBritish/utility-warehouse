@@ -10,18 +10,20 @@ const VISITOR_KEY = "uw-visitor-id";
 const SESSION_KEY = "uw-session-id";
 const UTM_KEY = "uw-utm";
 
-export type Consent = "granted" | "denied" | null;
+/** "all" = analytics + marketing (ad tags), "analytics" = our own stats only. */
+export type Consent = "all" | "analytics" | "denied" | null;
 
 export function getConsent(): Consent {
   try {
     const v = window.localStorage.getItem(CONSENT_KEY);
-    return v === "granted" || v === "denied" ? v : null;
+    if (v === "granted") return "analytics"; // choice saved before marketing cookies existed
+    return v === "all" || v === "analytics" || v === "denied" ? v : null;
   } catch {
     return null;
   }
 }
 
-export function setConsent(value: "granted" | "denied"): void {
+export function setConsent(value: "all" | "analytics" | "denied"): void {
   try {
     window.localStorage.setItem(CONSENT_KEY, value);
     if (value === "denied") {
@@ -88,7 +90,8 @@ export async function trackPageView(path: string): Promise<void> {
   if (key === lastTracked) return;
   lastTracked = key;
 
-  const consented = getConsent() === "granted";
+  const choice = getConsent();
+  const consented = choice === "all" || choice === "analytics";
   const ref = document.referrer && !document.referrer.startsWith(window.location.origin) ? document.referrer : null;
   const { data } = await supabase.auth.getSession();
   const tags = utm(consented);

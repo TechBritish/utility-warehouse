@@ -48,6 +48,9 @@ export function SiteHeader() {
           <Link to="/admin" className="text-sm text-muted-foreground hover:text-foreground">
             Admin
           </Link>
+          <a href="/#bill-check" className="text-sm text-muted-foreground hover:text-foreground">
+            Free bill check
+          </a>
           <a href="#faq" className="text-sm text-muted-foreground hover:text-foreground">
             FAQ
           </a>
