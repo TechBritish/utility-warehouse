@@ -44,6 +44,7 @@ import {
 } from "@/components/ui/table";
 import { useAdminData, type AdminPartner, type PartnerStatus } from "@/lib/use-admin-data";
 import { RequireAuth } from "@/components/uw/RequireAuth";
+import { WebsiteTraffic } from "@/components/uw/WebsiteTraffic";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -197,6 +198,8 @@ function AdminPage() {
             </div>
           ))}
         </div>
+
+        <WebsiteTraffic />
 
         {/* Charts */}
         <div className="mt-6 grid gap-4 lg:grid-cols-2">

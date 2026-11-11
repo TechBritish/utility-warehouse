@@ -50,6 +50,22 @@ const sections: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    title: "Website visits and cookies",
+    body: (
+      <>
+        <p>
+          We record the pages people visit, the site they came from, and whether they're on a phone,
+          tablet or computer, so we can see how the site is used and improve it.
+        </p>
+        <p className="mt-2">
+          If you choose "Accept" on the cookie banner, we also store a random ID in your browser so we
+          can count returning visitors. If you choose "No thanks", no ID is stored. You can change your
+          mind any time by clearing this site's data in your browser.
+        </p>
+      </>
+    ),
+  },
+  {
     title: "Voice conversations",
     body: (
       <p>

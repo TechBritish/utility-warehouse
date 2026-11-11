@@ -22,6 +22,7 @@ import { Route as SessionsRouteImport } from './routes/sessions'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as TrainerRouteImport } from './routes/trainer'
+import { Route as ApiAvaChatRouteImport } from './routes/api/ava-chat'
 import { Route as TrainingIndexRouteImport } from './routes/training.index'
 import { Route as TrainingModuleIdRouteImport } from './routes/training.$moduleId'
 
@@ -90,6 +91,11 @@ const TrainerRoute = TrainerRouteImport.update({
   path: '/trainer',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAvaChatRoute = ApiAvaChatRouteImport.update({
+  id: '/api/ava-chat',
+  path: '/api/ava-chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TrainingIndexRoute = TrainingIndexRouteImport.update({
   id: '/training/',
   path: '/training/',
@@ -115,6 +121,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/trainer': typeof TrainerRoute
+  '/api/ava-chat': typeof ApiAvaChatRoute
   '/training/$moduleId': typeof TrainingModuleIdRoute
   '/training/': typeof TrainingIndexRoute
 }
@@ -132,6 +139,7 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/trainer': typeof TrainerRoute
+  '/api/ava-chat': typeof ApiAvaChatRoute
   '/training/$moduleId': typeof TrainingModuleIdRoute
   '/training': typeof TrainingIndexRoute
 }
@@ -150,6 +158,7 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRoute
   '/signup': typeof SignupRoute
   '/trainer': typeof TrainerRoute
+  '/api/ava-chat': typeof ApiAvaChatRoute
   '/training/$moduleId': typeof TrainingModuleIdRoute
   '/training/': typeof TrainingIndexRoute
 }
@@ -169,6 +178,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/signup'
     | '/trainer'
+    | '/api/ava-chat'
     | '/training/$moduleId'
     | '/training/'
   fileRoutesByTo: FileRoutesByTo
@@ -186,6 +196,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/signup'
     | '/trainer'
+    | '/api/ava-chat'
     | '/training/$moduleId'
     | '/training'
   id:
@@ -203,6 +214,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/signup'
     | '/trainer'
+    | '/api/ava-chat'
     | '/training/$moduleId'
     | '/training/'
   fileRoutesById: FileRoutesById
@@ -221,6 +233,7 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRoute
   SignupRoute: typeof SignupRoute
   TrainerRoute: typeof TrainerRoute
+  ApiAvaChatRoute: typeof ApiAvaChatRoute
   TrainingModuleIdRoute: typeof TrainingModuleIdRoute
   TrainingIndexRoute: typeof TrainingIndexRoute
 }
@@ -318,6 +331,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrainerRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/ava-chat': {
+      id: '/api/ava-chat'
+      path: '/api/ava-chat'
+      fullPath: '/api/ava-chat'
+      preLoaderRoute: typeof ApiAvaChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/training/': {
       id: '/training/'
       path: '/training'
@@ -349,6 +369,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRoute,
   SignupRoute: SignupRoute,
   TrainerRoute: TrainerRoute,
+  ApiAvaChatRoute: ApiAvaChatRoute,
   TrainingModuleIdRoute: TrainingModuleIdRoute,
   TrainingIndexRoute: TrainingIndexRoute,
 }

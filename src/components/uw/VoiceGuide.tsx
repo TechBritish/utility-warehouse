@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "@tanstack/react-router";
-import { CalendarCheck, LifeBuoy, Loader2, LogIn, Mic, MicOff, PhoneOff, PiggyBank, Sparkles, X } from "lucide-react";
+import { CalendarCheck, LifeBuoy, Loader2, LogIn, Mic, MicOff, PhoneOff, PiggyBank, Send, Sparkles, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { VOICE_PAGES, buildSiteKnowledge, type VoicePage } from "@/lib/site-knowledge";
 import { VAPI_GUIDE_ASSISTANT_ID, VAPI_PUBLIC_KEY } from "@/lib/vapi-config";
@@ -102,6 +103,9 @@ export function VoiceGuide() {
   const [lines, setLines] = useState<Line[]>([]);
   const [partial, setPartial] = useState<Line | null>(null);
   const [lastAction, setLastAction] = useState<string | null>(null);
+  const [draft, setDraft] = useState("");
+  const [sending, setSending] = useState(false);
+  const chatIdRef = useRef<string | null>(null);
   const logRef = useRef<HTMLDivElement>(null);
 
   const publicKey = VAPI_PUBLIC_KEY;
@@ -202,7 +206,7 @@ export function VoiceGuide() {
       return;
     }
     setStatus("connecting");
-    setLines([]);
+    if (!chatIdRef.current) setLines([]);
     setPartial(null);
     try {
       let vapi = vapiRef.current;
@@ -288,6 +292,47 @@ export function VoiceGuide() {
     setMuted(next);
   };
 
+  // Typed messages: added to the live call if one is running, otherwise sent
+  // to Ava's text chat (server route /api/ava-chat).
+  const sendText = async () => {
+    const text = draft.trim();
+    if (!text || sending) return;
+    setDraft("");
+    setLines((p) => [...p, { who: "you", text }]);
+    if (status === "active" && vapiRef.current) {
+      vapiRef.current.send({ type: "add-message", message: { role: "user", content: text } });
+      return;
+    }
+    setSending(true);
+    try {
+      const res = await fetch("/api/ava-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ input: text, previousChatId: chatIdRef.current, path: pathRef.current }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { chatId?: string | null; reply?: string; error?: string };
+      if (!res.ok || !data.reply) {
+        setLines((p) => [
+          ...p,
+          {
+            who: "ai",
+            text:
+              data.error === "not_configured"
+                ? "Typing to me isn't switched on just yet. Tap Talk to Ava below and we can chat by voice."
+                : "Sorry, something went wrong there. Could you try again?",
+          },
+        ]);
+        return;
+      }
+      if (data.chatId) chatIdRef.current = data.chatId;
+      setLines((p) => [...p, { who: "ai", text: data.reply! }]);
+    } catch {
+      setLines((p) => [...p, { who: "ai", text: "Sorry, I couldn't connect. Check your internet and try again." }]);
+    } finally {
+      setSending(false);
+    }
+  };
+
   // The trainer page runs its own voice session.
   if (location.pathname.startsWith("/trainer") && status === "idle") return null;
 
@@ -305,7 +350,7 @@ export function VoiceGuide() {
             <div>
               <p className="text-sm font-bold">Ava · Your UW guide</p>
               <p className="text-xs opacity-80">
-                {status === "connecting" ? "Connecting…" : active ? (speaking ? "Speaking…" : "Listening…") : "Tap a button and just talk"}
+                {status === "connecting" ? "Connecting…" : active ? (speaking ? "Speaking…" : "Listening…") : "Talk or type, whichever you prefer"}
               </p>
             </div>
             <button aria-label="Close voice guide" onClick={closePanel} className="rounded-lg p-1 hover:bg-primary-foreground/15">
@@ -369,7 +414,38 @@ export function VoiceGuide() {
                 {l.text}
               </p>
             ))}
+            {sending && (
+              <p className="mr-8 flex items-center gap-2 rounded-xl bg-secondary px-3 py-2 text-secondary-foreground">
+                <Loader2 className="size-3.5 animate-spin" aria-hidden="true" /> Ava is typing…
+              </p>
+            )}
           </div>
+
+          <form
+            className="flex items-center gap-2 border-t border-border px-3 py-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void sendText();
+            }}
+          >
+            <Input
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              placeholder={active ? "Or type a message…" : "Type a message to Ava…"}
+              aria-label="Type a message to Ava"
+              maxLength={1000}
+              className="min-h-11 flex-1 rounded-xl text-base sm:text-sm"
+            />
+            <Button
+              type="submit"
+              size="icon"
+              aria-label="Send message"
+              disabled={!draft.trim() || sending}
+              className="min-h-11 min-w-11 rounded-xl"
+            >
+              <Send className="size-4" />
+            </Button>
+          </form>
 
           {lastAction && active && (
             <p className="border-t border-border px-4 py-2 text-xs text-muted-foreground">✓ {lastAction}</p>

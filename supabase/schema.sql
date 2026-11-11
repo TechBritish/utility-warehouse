@@ -119,3 +119,20 @@ create policy "Admins can view all badges" on public.user_badges
 
 -- To grant someone admin access, run in the SQL editor:
 --   update public.profiles set is_admin = true where email = 'someone@example.com';
+
+-- Website analytics: page views recorded by src/lib/analytics.ts, read on /admin
+-- through admin_traffic_summary(). Applied as migration "page_views_analytics".
+create table if not exists public.page_views (
+  id bigint generated always as identity primary key,
+  created_at timestamptz not null default now(),
+  visitor_id text,
+  session_id text,
+  path text not null,
+  referrer text,
+  utm_source text,
+  utm_medium text,
+  utm_campaign text,
+  device text,
+  user_id uuid references auth.users (id) on delete set null
+);
+-- Policies: anyone may insert (length-checked), admins may select.
