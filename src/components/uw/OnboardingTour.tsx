@@ -53,10 +53,23 @@ export function OnboardingTour({ steps, onFinish }: { steps: Step[]; onFinish: (
       const el = step?.ref?.current;
       setRect(el ? el.getBoundingClientRect() : null);
     }
+    // Move the page so the highlighted box is in view, with room for the card.
+    const el = step?.ref?.current;
+    if (el) {
+      const r = el.getBoundingClientRect();
+      const tall = r.height > window.innerHeight * 0.55;
+      el.scrollIntoView({ behavior: "smooth", block: tall ? "start" : "center" });
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
     update();
+    const t1 = window.setTimeout(update, 250);
+    const t2 = window.setTimeout(update, 600);
     window.addEventListener("resize", update);
     window.addEventListener("scroll", update, true);
     return () => {
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
       window.removeEventListener("resize", update);
       window.removeEventListener("scroll", update, true);
     };
@@ -84,12 +97,27 @@ export function OnboardingTour({ steps, onFinish }: { steps: Step[]; onFinish: (
 
   const isLast = index === steps.length - 1;
 
-  const cardStyle = rect
-    ? {
-        top: Math.min(rect.bottom + 12, window.innerHeight - 220),
-        left: Math.max(16, Math.min(rect.left, window.innerWidth - 336)),
-      }
-    : { top: window.innerHeight / 2 - 100, left: window.innerWidth / 2 - 160 };
+  // Keep the card fully on screen: below the box if there's room, otherwise
+  // above it, otherwise pinned to the bottom of the screen.
+  const CARD_H = 250;
+  const cardW = Math.min(320, window.innerWidth - 32);
+  let cardStyle: { top: number; left: number };
+  if (rect) {
+    const below = rect.bottom + 12;
+    const above = rect.top - 12 - CARD_H;
+    const top =
+      below + CARD_H <= window.innerHeight - 12
+        ? below
+        : above >= 12
+          ? above
+          : window.innerHeight - CARD_H - 12;
+    cardStyle = {
+      top: Math.max(12, top),
+      left: Math.max(16, Math.min(rect.left, window.innerWidth - cardW - 16)),
+    };
+  } else {
+    cardStyle = { top: window.innerHeight / 2 - CARD_H / 2, left: (window.innerWidth - cardW) / 2 };
+  }
 
   return (
     <div className="fixed inset-0 z-[100]" role="dialog" aria-modal="true" aria-label="Onboarding tour">

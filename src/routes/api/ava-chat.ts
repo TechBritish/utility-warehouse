@@ -22,7 +22,7 @@ export const Route = createFileRoute("/api/ava-chat")({
         const key = process.env.VAPI_PRIVATE_KEY;
         if (!key) return Response.json({ error: "not_configured" }, { status: 503 });
 
-        let body: { input?: unknown; previousChatId?: unknown; path?: unknown };
+        let body: { input?: unknown; previousChatId?: unknown; path?: unknown; visitor?: unknown };
         try {
           body = await request.json();
         } catch {
@@ -31,6 +31,9 @@ export const Route = createFileRoute("/api/ava-chat")({
         const input = typeof body.input === "string" ? body.input.trim().slice(0, 1000) : "";
         if (!input) return Response.json({ error: "empty" }, { status: 400 });
         const path = typeof body.path === "string" ? body.path.slice(0, 200) : "/";
+        // Visitor facts come from the browser: keep them short and plain text.
+        const visitor =
+          typeof body.visitor === "string" ? body.visitor.slice(0, 600).replace(/[^\w\s:().,'&+-]/g, "") : "";
         const previousChatId =
           typeof body.previousChatId === "string" && /^[\w-]{8,64}$/.test(body.previousChatId)
             ? body.previousChatId
@@ -47,7 +50,7 @@ export const Route = createFileRoute("/api/ava-chat")({
               model: {
                 provider: "openai",
                 model: "gpt-4o-mini",
-                messages: [{ role: "system", content: buildSiteKnowledge(path) + TEXT_MODE }],
+                messages: [{ role: "system", content: buildSiteKnowledge(path) + (visitor ? `\n\n${visitor}` : "") + TEXT_MODE }],
               },
             },
           }),

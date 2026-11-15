@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { VOICE_PAGES, buildSiteKnowledge, type VoicePage } from "@/lib/site-knowledge";
+import { describeVisitor, getVisitorContext } from "@/lib/visitor-context";
 import { VAPI_GUIDE_ASSISTANT_ID, VAPI_PUBLIC_KEY } from "@/lib/vapi-config";
 
 // @vapi-ai/web is browser-only, so it's imported lazily inside start().
@@ -294,6 +295,7 @@ export function VoiceGuide() {
       // there's a single assistant with the full product/site knowledge and
       // a consistent voice — just with its own first message, system prompt
       // and navigation tools layered on top for this site-guide context.
+      const visitor = describeVisitor(await getVisitorContext());
       await vapi.start(assistantId, {
         firstMessage: FIRST_MESSAGES[intent],
         model: {
@@ -304,6 +306,7 @@ export function VoiceGuide() {
               role: "system",
               content:
                 buildSiteKnowledge(pathRef.current) +
+                visitor +
                 (intent === "general" ? "" : `\n\nThe visitor tapped: "${INTENT_LABELS[intent]}". Follow that path.`),
             },
           ],
@@ -341,7 +344,12 @@ export function VoiceGuide() {
       const res = await fetch("/api/ava-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ input: text, previousChatId: chatIdRef.current, path: pathRef.current }),
+        body: JSON.stringify({
+          input: text,
+          previousChatId: chatIdRef.current,
+          path: pathRef.current,
+          visitor: describeVisitor(await getVisitorContext()),
+        }),
       });
       const data = (await res.json().catch(() => ({}))) as { chatId?: string | null; reply?: string; error?: string };
       if (!res.ok || !data.reply) {
