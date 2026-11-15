@@ -127,6 +127,17 @@ export function VoiceGuide() {
     // The home page shows the welcome popup instead, which has its own
     // "Speak to Ava" button.
     if (location.pathname === "/") return;
+    // New members get the tour first, then Ava rings (see dashboard).
+    let newMember = new URLSearchParams(window.location.search).get("welcome") === "member";
+    try {
+      newMember ||= window.sessionStorage.getItem("uw-new-member-flow") === "1";
+    } catch {
+      /* storage unavailable */
+    }
+    if (newMember) {
+      setNudge(true);
+      return;
+    }
     let dismissed = false;
     try {
       dismissed = window.sessionStorage.getItem(AVA_DISMISSED_KEY) === "1";

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   Mic,
@@ -26,6 +26,8 @@ import { AppHeader } from "@/components/uw/AppHeader";
 import { OnboardingTour, useOnboardingTour } from "@/components/uw/OnboardingTour";
 import { RequireAuth } from "@/components/uw/RequireAuth";
 import { PlanBadge } from "@/components/uw/PlanBadge";
+import { AVA_START_EVENT, AvaCallScreen } from "@/components/uw/WelcomePopup";
+import { fireConfetti } from "@/lib/confetti";
 import { getSession, getDisplayName } from "@/lib/auth";
 import { usePartnerData } from "@/lib/use-partner-data";
 
@@ -85,7 +87,32 @@ function Dashboard() {
   const milestonesRef = useRef<HTMLDivElement>(null);
   const continueBtnRef = useRef<HTMLDivElement>(null);
 
-  const { enabled: tourEnabled, dismiss } = useOnboardingTour();
+  const { enabled: tourEnabled, dismiss, restart } = useOnboardingTour();
+
+  // Just paid (Stripe sends people back with ?welcome=member): celebrate,
+  // run the guided tour, then Ava "rings" like a phone call.
+  const [newMember, setNewMember] = useState(false);
+  const [avaCalling, setAvaCalling] = useState(false);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("welcome") !== "member") return;
+    setNewMember(true);
+    try {
+      window.sessionStorage.setItem("uw-new-member-flow", "1");
+    } catch {
+      /* storage unavailable */
+    }
+    params.delete("welcome");
+    const qs = params.toString();
+    window.history.replaceState(null, "", window.location.pathname + (qs ? `?${qs}` : ""));
+    fireConfetti();
+    restart();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const finishTour = () => {
+    dismiss();
+    if (newMember) window.setTimeout(() => setAvaCalling(true), 600);
+  };
   const { loading, modules, stats, recentActivity, badges, sessions, modulePercent } =
     usePartnerData();
   const [selectedBadge, setSelectedBadge] = useState<(typeof badges)[number] | null>(null);
@@ -113,9 +140,10 @@ function Dashboard() {
 
   const tourSteps = [
     {
-      title: "Welcome to Partner Coach 👋",
-      description:
-        "This quick tour shows you exactly what to click to complete your training. It takes less than a minute — let's go!",
+      title: newMember ? "Welcome, you're in! 🎉" : "Welcome to Partner Coach 👋",
+      description: newMember
+        ? "Thanks for joining. Here's a 1-minute tour of everything you've unlocked, then Ava will give you a call to help you get started."
+        : "This quick tour shows you exactly what to click to complete your training. It takes less than a minute — let's go!",
     },
     {
       title: "Your progress at a glance",
@@ -593,7 +621,31 @@ function Dashboard() {
         </DialogContent>
       </Dialog>
 
-      {tourEnabled && <OnboardingTour steps={tourSteps} onFinish={dismiss} />}
+      {tourEnabled && <OnboardingTour steps={tourSteps} onFinish={finishTour} />}
+      {avaCalling && (
+        <AvaCallScreen
+          message="Welcome aboard! I'm Ava, your guide. Answer and I'll help you start Module 1 right now."
+          onAnswer={() => {
+            setAvaCalling(false);
+            try {
+              window.sessionStorage.removeItem("uw-new-member-flow");
+            } catch {
+              /* storage unavailable */
+            }
+            setNewMember(false);
+            window.dispatchEvent(new Event(AVA_START_EVENT));
+          }}
+          onDecline={() => {
+            setAvaCalling(false);
+            try {
+              window.sessionStorage.removeItem("uw-new-member-flow");
+            } catch {
+              /* storage unavailable */
+            }
+            setNewMember(false);
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -33,26 +33,10 @@ function clock() {
 export function WelcomePopup() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-  const [time, setTime] = useState("");
-
   useEffect(() => {
-    setTime(clock());
     const id = window.setTimeout(() => setOpen(true), 400);
     return () => window.clearTimeout(id);
   }, []);
-
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && close();
-    document.addEventListener("keydown", onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prev;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
 
   const close = () => {
     setOpen(false);
@@ -76,9 +60,47 @@ export function WelcomePopup() {
   if (!open) return null;
 
   return (
+    <AvaCallScreen
+      message="Hi! Answer and I'll show you around in a minute. Lower bills, joining, or signing in."
+      shortcuts={SHORTCUTS.map((sc) => ({ icon: sc.icon, label: sc.label, onClick: () => go(sc.action) }))}
+      onAnswer={answer}
+      onDecline={close}
+    />
+  );
+}
+
+type Shortcut = { icon: typeof PiggyBank; label: string; onClick: () => void };
+
+/** iPhone-style incoming call from Ava. Green answers (starts a voice call), red declines. */
+export function AvaCallScreen({
+  message,
+  shortcuts = [],
+  onAnswer,
+  onDecline,
+}: {
+  message: string;
+  shortcuts?: Shortcut[];
+  onAnswer: () => void;
+  onDecline: () => void;
+}) {
+  const [time, setTime] = useState("");
+  useEffect(() => {
+    setTime(clock());
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onDecline();
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
     <div
       className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 p-3 backdrop-blur-md"
-      onClick={close}
+      onClick={onDecline}
     >
       <style>{CALL_CSS}</style>
       {/* Phone */}
@@ -125,16 +147,16 @@ export function WelcomePopup() {
           </div>
 
           <p className="mt-6 max-w-[16rem] text-sm leading-relaxed text-white/80">
-            Hi! Answer and I'll show you around in a minute. Lower bills, joining, or signing in.
+            {message}
           </p>
 
           {/* Shortcuts, like the iOS Remind Me / Message row */}
           <div className="mt-auto grid w-full grid-cols-3 gap-2 pb-6">
-            {SHORTCUTS.map((s) => (
+            {shortcuts.map((s) => (
               <button
-                key={s.action}
+                key={s.label}
                 type="button"
-                onClick={() => go(s.action)}
+                onClick={s.onClick}
                 className="flex flex-col items-center gap-1.5 rounded-2xl py-2 text-xs font-medium text-white/90 hover:bg-white/10"
               >
                 <span className="grid size-11 place-items-center rounded-full bg-white/15 backdrop-blur">
@@ -151,7 +173,7 @@ export function WelcomePopup() {
           <div className="flex flex-col items-center gap-2">
             <button
               type="button"
-              onClick={close}
+              onClick={onDecline}
               aria-label="Decline, close this"
               className="grid size-20 place-items-center rounded-full bg-[#ff3b30] shadow-lg transition-transform hover:scale-105 active:scale-95"
             >
@@ -162,7 +184,7 @@ export function WelcomePopup() {
           <div className="flex flex-col items-center gap-2">
             <button
               type="button"
-              onClick={answer}
+              onClick={onAnswer}
               aria-label="Accept, speak to Ava"
               className="grid size-20 place-items-center rounded-full bg-[#34c759] shadow-lg transition-transform hover:scale-105 active:scale-95"
             >
