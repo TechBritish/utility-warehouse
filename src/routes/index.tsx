@@ -20,6 +20,7 @@ import {
 import { SiteHeader, UwLogo } from "@/components/uw/SiteHeader";
 import { Waveform } from "@/components/uw/Waveform";
 import { LeadForm } from "@/components/uw/LeadForm";
+import { WelcomePopup } from "@/components/uw/WelcomePopup";
 import { VideoDemoDialog } from "@/components/uw/VideoDemoDialog";
 import { ModulesExplorer } from "@/components/uw/ModulesExplorer";
 import { DialogTrigger } from "@/components/ui/dialog";
@@ -119,6 +120,7 @@ function Landing() {
   return (
     <div className="min-h-dvh bg-background">
       <SiteHeader />
+      <WelcomePopup />
       <main>
         {/* Hero */}
         <section className="relative overflow-hidden">

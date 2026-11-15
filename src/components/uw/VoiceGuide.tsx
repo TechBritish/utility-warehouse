@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+
+import { AVA_START_EVENT, WELCOME_CLOSED_EVENT } from "@/components/uw/WelcomePopup";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { CalendarCheck, LifeBuoy, Loader2, LogIn, Mic, MicOff, PhoneOff, PiggyBank, Send, Sparkles, X } from "lucide-react";
 import { toast } from "sonner";
@@ -122,6 +124,9 @@ export function VoiceGuide() {
   // can start, so the call itself starts from the buttons in the panel.
   useEffect(() => {
     if (location.pathname.startsWith("/trainer")) return;
+    // The home page shows the welcome popup instead, which has its own
+    // "Speak to Ava" button.
+    if (location.pathname === "/") return;
     let dismissed = false;
     try {
       dismissed = window.sessionStorage.getItem(AVA_DISMISSED_KEY) === "1";
@@ -135,6 +140,22 @@ export function VoiceGuide() {
     const id = window.setTimeout(() => setOpen(true), 900);
     return () => window.clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Welcome popup (home page): "Speak to Ava" starts a call, closing it shows the nudge.
+  const startRef = useRef<(intent?: Intent) => Promise<void>>(async () => {});
+  useEffect(() => {
+    const onStart = () => {
+      setOpen(true);
+      void startRef.current("general");
+    };
+    const onClosed = () => setNudge(true);
+    window.addEventListener(AVA_START_EVENT, onStart);
+    window.addEventListener(WELCOME_CLOSED_EVENT, onClosed);
+    return () => {
+      window.removeEventListener(AVA_START_EVENT, onStart);
+      window.removeEventListener(WELCOME_CLOSED_EVENT, onClosed);
+    };
   }, []);
 
   const closePanel = () => {
@@ -284,6 +305,7 @@ export function VoiceGuide() {
       toast.error("The voice guide couldn't start. Check your microphone and try again.");
     }
   }, [publicKey, assistantId, runTool]);
+  startRef.current = start;
 
   const stop = () => vapiRef.current?.stop();
   const toggleMute = () => {
