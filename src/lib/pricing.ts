@@ -24,7 +24,7 @@ export const PLANS: Plan[] = [
     price: "£29.99",
     pence: 2999,
     tagline: "Everything you need to get started with confidence.",
-    paymentLink: "",
+    paymentLink: "https://buy.stripe.com/test_eVq00j8Hr1aafkv4tJdjO00",
     features: [
       { text: "All 4 foundation training modules" },
       { text: "Voice AI practice with real-style customers" },
@@ -39,7 +39,7 @@ export const PLANS: Plan[] = [
     price: "£149.99",
     pence: 14999,
     tagline: "For Partners who want to grow faster with Sheila by their side.",
-    paymentLink: "",
+    paymentLink: "https://buy.stripe.com/test_dRm9AT4rb0660pB4tJdjO01",
     highlight: true,
     features: [
       { text: "Everything in Basic" },
