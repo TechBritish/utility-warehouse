@@ -100,7 +100,7 @@ const faqs = [
   },
   {
     q: "How much does the training cost?",
-    a: "There's no charge for the portal. It's exclusive to Partners in John and Sheila's team, so ask Sheila if you'd like access.",
+    a: "Membership is £29.99 a month for Basic or £149.99 a month for Premium, with no contract. See the Pricing page for what's included in each.",
   },
   {
     q: "Will the AI help me earn more?",
@@ -310,9 +310,9 @@ function Landing() {
                 ))}
               </ul>
               <Button asChild size="lg" className="mt-8 min-h-12 rounded-xl px-6">
-                <Link to="/signup">
+                <Link to="/pricing">
                   <Mic />
-                  Start free training
+                  See plans and pricing
                 </Link>
               </Button>
             </div>

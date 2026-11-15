@@ -33,29 +33,32 @@ export function SiteHeader() {
     <header className="sticky top-0 z-40 border-b border-border/70 bg-background/85 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
         <Link to="/" aria-label="Partner Coach home">
-          <UwLogo />
+          <UwLogo compact />
         </Link>
         <nav aria-label="Main" className="hidden items-center gap-6 md:flex">
-          <a href="#why" className="text-sm text-muted-foreground hover:text-foreground">
+          <a href="/#why" className="text-sm text-muted-foreground hover:text-foreground">
             Why voice AI
           </a>
-          <a href="#modules" className="text-sm text-muted-foreground hover:text-foreground">
+          <a href="/#modules" className="text-sm text-muted-foreground hover:text-foreground">
             Modules
           </a>
           <Link to="/guidelines" className="text-sm text-muted-foreground hover:text-foreground">
             Conversation guide
           </Link>
-          <Link to="/admin" className="text-sm text-muted-foreground hover:text-foreground">
-            Admin
+          <Link to="/pricing" className="text-sm font-semibold text-brand hover:underline">
+            Pricing
           </Link>
           <a href="/#bill-check" className="text-sm text-muted-foreground hover:text-foreground">
             Free bill check
           </a>
-          <a href="#faq" className="text-sm text-muted-foreground hover:text-foreground">
+          <a href="/#faq" className="text-sm text-muted-foreground hover:text-foreground">
             FAQ
           </a>
         </nav>
         <div className="flex items-center gap-1 sm:gap-2">
+          <Link to="/pricing" className="px-2 text-sm font-semibold text-brand md:hidden">
+            Pricing
+          </Link>
           <ThemeToggle />
           <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
             <Link to="/login">Sign in</Link>

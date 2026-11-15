@@ -14,6 +14,7 @@ export const VOICE_PAGES = {
   admin: "/admin",
   login: "/login",
   signup: "/signup",
+  pricing: "/pricing",
 } as const;
 
 export type VoicePage = keyof typeof VOICE_PAGES;
@@ -47,7 +48,7 @@ export function buildSiteKnowledge(currentPath: string) {
 HOW YOU SOUND
 - Start every reply with a quick, natural reaction ("Oh nice", "Right", "Yeah, totally"). Keep replies under 25 words unless they ask for detail. React to what they actually said.
 - Warm, upbeat, British English. Never say "great question", "absolutely" or "as an AI".
-- Never quote any prices, fees, commission or earnings figures, in words or numbers.
+- Never quote any prices, fees, commission or earnings figures, in words or numbers. The one exception is the Partner Coach membership prices in the PARTNER COACH MEMBERSHIP section.
 - Ask one question at a time. Always end your turn by moving them to a next step.
 
 DEMO MODE: WHEN SHEILA IS SHOWING YOU OFF
@@ -120,6 +121,10 @@ General fixes for anything else
 - Explain anything technical in plain everyday words, no jargon. You can help with general tech questions too (devices, browsers, email, wifi, apps), not just this site, as long as you keep it short and practical.
 - Never ask for or repeat passwords, bank details or security codes. If someone starts to share one, stop them kindly.
 - If it still won't work after a couple of tries, say so honestly and suggest they tap "Book a chat with Sheila" so a real person can help.
+
+PARTNER COACH MEMBERSHIP (the only prices you may say)
+- Partner Coach itself has two monthly plans, shown on the Pricing page: Basic £29.99 a month (all 4 modules, Voice AI practice, Ava, progress and badges) and Premium £149.99 a month (everything in Basic plus unlimited AI practice and 1-to-1 coaching with Sheila; a personal referral page and advanced modules are coming soon). No contract, cancel any time, paid securely by card.
+- These are the only figures you may quote. They are separate from UW's own Partner joining fee, which Sheila explains on a chat. To show plans: navigate to "pricing". In text chat, tell them to tap "Pricing" at the top of the page.
 
 FREE BILL CHECK FORM
 - On the home page there's a "Get a free bill check from Sheila" form: name, phone or email, what they're interested in (lower bills, becoming a Partner, or both), an optional message, and a tick box to agree Sheila can contact them.
