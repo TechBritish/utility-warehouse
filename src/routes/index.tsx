@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/accordion";
 import { SiteHeader, UwLogo } from "@/components/uw/SiteHeader";
 import { Waveform } from "@/components/uw/Waveform";
-import { LeadForm } from "@/components/uw/LeadForm";
+import { BillCheckPromo } from "@/components/uw/BillCheckPromo";
 import { WelcomePopup } from "@/components/uw/WelcomePopup";
 import { VideoDemoDialog } from "@/components/uw/VideoDemoDialog";
 import { ModulesExplorer } from "@/components/uw/ModulesExplorer";
@@ -119,6 +119,13 @@ const faqs = [
 function Landing() {
   return (
     <div className="min-h-dvh bg-background">
+      <a
+        href="#bill-check"
+        className="uw-shine block bg-gradient-to-r from-[#7c3aed] via-[#a855f7] to-[#7c3aed] px-4 py-2.5 text-center text-sm font-semibold text-white"
+      >
+        🔥 Free bill check from Sheila. It takes 60 seconds.{" "}
+        <span className="underline underline-offset-4">Claim yours →</span>
+      </a>
       <SiteHeader />
       <WelcomePopup />
       <main>
@@ -338,21 +345,7 @@ function Landing() {
         </section>
 
         {/* Free bill check (lead form) */}
-        <section id="bill-check" className="scroll-mt-20 border-b border-border py-16 sm:py-24">
-          <div className="mx-auto grid max-w-6xl gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:items-center">
-            <div>
-              <h2 className="text-3xl font-bold tracking-tight text-balance sm:text-4xl">
-                Get a free bill check from Sheila
-              </h2>
-              <p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
-                Leave your details and Sheila will look at what you pay today for energy, broadband,
-                mobile and insurance, and get you a proper UW quote. Or ask her about becoming a
-                Partner. No obligation, no pressure.
-              </p>
-            </div>
-            <LeadForm />
-          </div>
-        </section>
+        <BillCheckPromo />
 
         {/* FAQ */}
         <section id="faq" className="py-16 sm:py-24">

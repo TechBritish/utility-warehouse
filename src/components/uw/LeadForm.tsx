@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { getConsent } from "@/lib/analytics";
 import { marketingLead } from "@/lib/marketing-tags";
 import { supabase } from "@/lib/supabase";
+import { fireConfetti } from "@/lib/confetti";
 
 type Interest = "bills" | "partner" | "both";
 
@@ -62,8 +63,13 @@ export function LeadForm() {
     setSending(false);
     if (err) return setError("Sorry, that didn't send. Please try again in a moment.");
     marketingLead();
+    fireConfetti();
     setDone(true);
   };
+
+  const progress = Math.round(
+    ((name.trim() ? 1 : 0) + (phone.trim() || email.trim() ? 1 : 0) + (consent ? 1 : 0)) * (100 / 3),
+  );
 
   if (done) {
     return (
@@ -71,7 +77,7 @@ export function LeadForm() {
         <CheckCircle2 className="mx-auto size-10 text-success" aria-hidden="true" />
         <h3 className="mt-3 text-xl font-bold">Thanks, {name.trim().split(" ")[0]}!</h3>
         <p className="mt-2 text-sm text-muted-foreground">
-          Sheila will be in touch soon. There's no obligation and no pressure.
+          Your details are with Sheila. She'll be in touch soon. No obligation, no pressure.
         </p>
       </div>
     );
@@ -79,6 +85,20 @@ export function LeadForm() {
 
   return (
     <form onSubmit={submit} noValidate className="space-y-4 rounded-2xl border border-border bg-card p-5 shadow-card sm:p-8">
+      <div>
+        <h3 className="text-xl font-bold">Claim your free bill check</h3>
+        <div className="mt-3 flex items-center gap-3">
+          <div className="h-2 flex-1 overflow-hidden rounded-full bg-secondary" aria-hidden="true">
+            <div
+              className="h-full rounded-full bg-gradient-brand transition-all duration-500"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <span className="text-xs font-semibold text-muted-foreground">
+            {progress === 100 ? "Ready to send!" : `${progress}% done`}
+          </span>
+        </div>
+      </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-1.5 sm:col-span-2">
           <Label htmlFor="lead-name">Your name</Label>
@@ -144,9 +164,9 @@ export function LeadForm() {
         </p>
       )}
 
-      <Button type="submit" disabled={sending} className="min-h-12 w-full rounded-xl text-base">
+      <Button type="submit" disabled={sending} className="uw-shine min-h-14 w-full rounded-xl bg-gradient-brand text-lg font-bold shadow-elevated transition-transform hover:scale-[1.02]">
         {sending ? <Loader2 className="animate-spin" aria-hidden="true" /> : null}
-        {sending ? "Sending…" : "Get my free bill check"}
+        {sending ? "Sending…" : "Get my free bill check →"}
       </Button>
     </form>
   );
