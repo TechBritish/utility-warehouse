@@ -10,7 +10,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { SiteHeader } from "@/components/uw/SiteHeader";
-import { BOOKING_URL, checkoutUrl, PLANS, type Plan } from "@/lib/pricing";
+import { BOOKING_URL, checkoutUrl, PLANS, type Billing, type Plan } from "@/lib/pricing";
 import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/pricing")({
@@ -19,7 +19,7 @@ export const Route = createFileRoute("/pricing")({
       { title: "Pricing | Partner Coach" },
       {
         name: "description",
-        content: "Partner Coach membership: Basic £29.99 a month or Premium £149.99 a month. Cancel any time.",
+        content: "Partner Coach membership: Basic £29.99 a month or Premium £149.99 a month, or save 20% paying yearly. Cancel any time.",
       },
     ],
   }),
@@ -51,6 +51,7 @@ const FAQS = [
 
 function PricingPage() {
   const [user, setUser] = useState<{ id: string; email: string | null } | null>(null);
+  const [billing, setBilling] = useState<Billing>("monthly");
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -86,9 +87,32 @@ function PricingPage() {
         </section>
 
         <section aria-label="Plans" className="mx-auto max-w-5xl px-4 pb-10 sm:px-6">
+          <div className="mb-8 flex justify-center">
+            <div role="radiogroup" aria-label="Billing" className="inline-flex items-center rounded-full border border-border bg-card p-1 shadow-card">
+              {(["monthly", "yearly"] as const).map((b) => (
+                <button
+                  key={b}
+                  type="button"
+                  role="radio"
+                  aria-checked={billing === b}
+                  onClick={() => setBilling(b)}
+                  className={`min-h-11 rounded-full px-5 text-sm font-semibold transition-colors ${
+                    billing === b ? "bg-gradient-brand text-primary-foreground shadow" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {b === "monthly" ? "Monthly" : "Yearly"}
+                  {b === "yearly" && (
+                    <span className={`ml-2 rounded-full px-2 py-0.5 text-xs ${billing === b ? "bg-white/25" : "bg-success/15 text-success"}`}>
+                      Save 20%
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
           <div className="grid gap-6 md:grid-cols-2 md:items-stretch">
             {PLANS.map((plan, i) => (
-              <PlanCard key={plan.id} plan={plan} user={user} delay={i * 0.1} />
+              <PlanCard key={plan.id} plan={plan} billing={billing} user={user} delay={i * 0.1} />
             ))}
           </div>
 
@@ -136,14 +160,17 @@ function PricingPage() {
 
 function PlanCard({
   plan,
+  billing,
   user,
   delay,
 }: {
   plan: Plan;
+  billing: Billing;
   user: { id: string; email: string | null } | null;
   delay: number;
 }) {
-  const href = checkoutUrl(plan, { userId: user?.id ?? null, email: user?.email ?? null });
+  const yearly = billing === "yearly";
+  const href = checkoutUrl(plan, billing, { userId: user?.id ?? null, email: user?.email ?? null });
   const featured = plan.highlight;
 
   return (
@@ -166,9 +193,15 @@ function PlanCard({
       <h2 className="text-xl font-bold">{plan.name}</h2>
       <p className="mt-1 text-sm text-muted-foreground">{plan.tagline}</p>
       <p className="mt-5 flex items-baseline gap-1">
-        <span className="text-5xl font-extrabold tracking-tight">{plan.price}</span>
-        <span className="text-muted-foreground">/month</span>
+        <span className="text-5xl font-extrabold tracking-tight">{yearly ? plan.yearlyPrice : plan.price}</span>
+        <span className="text-muted-foreground">{yearly ? "/year" : "/month"}</span>
       </p>
+      {yearly && (
+        <p className="mt-1 text-sm">
+          <span className="text-muted-foreground line-through">{plan.yearlyFullPrice}</span>{" "}
+          <span className="font-semibold text-success">You save 20%</span>
+        </p>
+      )}
 
       <ul className="mt-6 flex-1 space-y-3">
         {plan.features.map((f) => (
@@ -209,7 +242,7 @@ function PlanCard({
           </a>
         </Button>
       )}
-      <p className="mt-3 text-center text-xs text-muted-foreground">Billed monthly. Cancel any time.</p>
+      <p className="mt-3 text-center text-xs text-muted-foreground">{yearly ? "Billed once a year. Cancel renewal any time." : "Billed monthly. Cancel any time."}</p>
     </div>
   );
 }

@@ -4,7 +4,7 @@
 // Events: checkout.session.completed, customer.subscription.updated, customer.subscription.deleted
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
-const PLAN_BY_PENCE: Record<number, "basic" | "premium"> = { 2999: "basic", 14999: "premium" };
+const PLAN_BY_PENCE: Record<number, "basic" | "premium"> = { 2999: "basic", 14999: "premium", 28790: "basic", 143990: "premium" };
 
 const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
   auth: { persistSession: false },
