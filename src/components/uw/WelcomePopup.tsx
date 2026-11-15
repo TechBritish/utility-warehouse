@@ -1,42 +1,42 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { ArrowRight, GraduationCap, LogIn, Mic, PiggyBank, X } from "lucide-react";
+import { GraduationCap, LogIn, Phone, PhoneOff, PiggyBank } from "lucide-react";
+
+import aiOrb from "@/assets/ai-orb.jpg";
 
 /** Fired to open Ava and start a voice call (handled in VoiceGuide). */
 export const AVA_START_EVENT = "uw:ava-start";
 /** Fired when the welcome popup closes, so Ava can show her nudge. */
 export const WELCOME_CLOSED_EVENT = "uw:welcome-closed";
 
-const STEPS = [
-  {
-    icon: PiggyBank,
-    title: "Want lower bills?",
-    text: "Leave your details for a free bill check from Sheila.",
-    cta: "Get a free bill check",
-    action: "bills" as const,
-  },
-  {
-    icon: GraduationCap,
-    title: "Thinking of becoming a Partner?",
-    text: "Create a free account and start the short training.",
-    cta: "Start free",
-    action: "signup" as const,
-  },
-  {
-    icon: LogIn,
-    title: "Already a Partner?",
-    text: "Sign in to carry on your training where you left off.",
-    cta: "Sign in",
-    action: "login" as const,
-  },
+const SHORTCUTS = [
+  { icon: PiggyBank, label: "Bill check", action: "bills" as const },
+  { icon: GraduationCap, label: "Join free", action: "signup" as const },
+  { icon: LogIn, label: "Sign in", action: "login" as const },
 ];
 
-/** Simple "how this site works" popup, shown on every visit to the home page. */
+const CALL_CSS = `
+@keyframes uw-ring { 0%,100% { transform: rotate(0) } 10%,30% { transform: rotate(-14deg) } 20%,40% { transform: rotate(14deg) } 50% { transform: rotate(0) } }
+@keyframes uw-buzz { 0%,100% { transform: translateX(0) } 2%,6% { transform: translateX(-3px) } 4%,8% { transform: translateX(3px) } 10% { transform: translateX(0) } }
+@keyframes uw-dots { 0%,20% { opacity: .2 } 50% { opacity: 1 } 100% { opacity: .2 } }
+.uw-ring { animation: uw-ring 1.2s ease-in-out infinite }
+.uw-buzz { animation: uw-buzz 2.4s ease-in-out infinite }
+.uw-dot { animation: uw-dots 1.4s infinite }
+@media (prefers-reduced-motion: reduce) { .uw-ring, .uw-buzz, .uw-dot { animation: none } }
+`;
+
+function clock() {
+  return new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+}
+
+/** Home page welcome, styled as an iPhone incoming call from Ava. Shown on every visit. */
 export function WelcomePopup() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [time, setTime] = useState("");
 
   useEffect(() => {
+    setTime(clock());
     const id = window.setTimeout(() => setOpen(true), 400);
     return () => window.clearTimeout(id);
   }, []);
@@ -59,12 +59,12 @@ export function WelcomePopup() {
     window.dispatchEvent(new Event(WELCOME_CLOSED_EVENT));
   };
 
-  const speakToAva = () => {
+  const answer = () => {
     setOpen(false);
     window.dispatchEvent(new Event(AVA_START_EVENT));
   };
 
-  const go = (action: (typeof STEPS)[number]["action"]) => {
+  const go = (action: (typeof SHORTCUTS)[number]["action"]) => {
     close();
     if (action === "bills") {
       document.getElementById("bill-check")?.scrollIntoView({ behavior: "smooth" });
@@ -77,77 +77,101 @@ export function WelcomePopup() {
 
   return (
     <div
-      className="fixed inset-0 z-[70] flex items-end justify-center bg-black/60 p-0 backdrop-blur-sm sm:items-center sm:p-6"
+      className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 p-3 backdrop-blur-md"
       onClick={close}
     >
+      <style>{CALL_CSS}</style>
+      {/* Phone */}
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="welcome-title"
         onClick={(e) => e.stopPropagation()}
-        className="relative max-h-dvh w-full overflow-y-auto rounded-t-3xl bg-card p-5 pt-6 shadow-lift sm:max-w-lg sm:rounded-3xl sm:p-8"
+        className="uw-buzz relative flex h-[min(760px,calc(100dvh-24px))] w-[min(370px,100%)] flex-col overflow-hidden rounded-[3rem] border-[10px] border-neutral-900 bg-gradient-to-b from-[#2b1d4f] via-[#3d2a6b] to-[#120c24] text-white shadow-2xl ring-1 ring-white/10"
       >
-        <button
-          type="button"
-          onClick={close}
-          aria-label="Close"
-          className="absolute top-3 right-3 grid size-14 place-items-center rounded-full bg-secondary text-foreground transition-colors hover:bg-accent"
-        >
-          <X className="size-8" strokeWidth={2.5} aria-hidden="true" />
-        </button>
-
-        <h2 id="welcome-title" className="pr-16 text-2xl font-bold tracking-tight sm:text-3xl">
-          Welcome! Here's how it works
-        </h2>
-        <p className="mt-1 text-muted-foreground">Pick what you're here for. It takes seconds.</p>
-
-        <button
-          type="button"
-          onClick={speakToAva}
-          className="mt-5 flex min-h-20 w-full items-center justify-center gap-3 rounded-2xl bg-gradient-brand px-5 text-xl font-bold text-primary-foreground shadow-elevated transition-transform hover:scale-[1.02] sm:text-2xl"
-        >
-          <span className="grid size-12 shrink-0 place-items-center rounded-full bg-white/20">
-            <Mic className="size-7" aria-hidden="true" />
+        {/* Status bar + dynamic island */}
+        <div className="relative flex h-11 shrink-0 items-center justify-between px-7 text-sm font-semibold">
+          <span>{time}</span>
+          <span className="absolute top-2 left-1/2 h-7 w-28 -translate-x-1/2 rounded-full bg-black" aria-hidden="true" />
+          <span className="flex items-center gap-1" aria-hidden="true">
+            <span className="flex items-end gap-px">
+              {[4, 6, 8, 10].map((h) => (
+                <span key={h} className="w-[3px] rounded-sm bg-white" style={{ height: h }} />
+              ))}
+            </span>
+            <span className="ml-1 h-3 w-6 rounded-[4px] border border-white/80 p-px">
+              <span className="block h-full w-4/5 rounded-[2px] bg-white" />
+            </span>
           </span>
-          Speak to Ava
-        </button>
-        <p className="mt-2 text-center text-sm text-muted-foreground">
-          Not sure? Ava is our friendly AI helper. Just talk, she'll guide you.
-        </p>
+        </div>
 
-        <ol className="mt-5 space-y-3">
-          {STEPS.map((s, i) => (
-            <li key={s.action}>
+        {/* Caller */}
+        <div className="flex flex-1 flex-col items-center px-6 pt-6 text-center sm:pt-10">
+          <p className="text-sm text-white/70">
+            Incoming call
+            <span className="uw-dot">.</span>
+            <span className="uw-dot" style={{ animationDelay: ".2s" }}>.</span>
+            <span className="uw-dot" style={{ animationDelay: ".4s" }}>.</span>
+          </p>
+          <h2 id="welcome-title" className="mt-2 text-4xl font-semibold tracking-tight">
+            Ava
+          </h2>
+          <p className="mt-1 text-base text-white/80">Simple Options · Your AI helper</p>
+
+          <div className="relative mt-8 grid size-36 place-items-center sm:size-40">
+            <span className="absolute inset-0 animate-ping rounded-full bg-white/15 motion-reduce:hidden" aria-hidden="true" />
+            <span className="absolute -inset-3 rounded-full ring-2 ring-white/10" aria-hidden="true" />
+            <img src={aiOrb} alt="" className="relative size-full rounded-full object-cover ring-4 ring-white/20" />
+          </div>
+
+          <p className="mt-6 max-w-[16rem] text-sm leading-relaxed text-white/80">
+            Hi! Answer and I'll show you around in a minute. Lower bills, joining, or signing in.
+          </p>
+
+          {/* Shortcuts, like the iOS Remind Me / Message row */}
+          <div className="mt-auto grid w-full grid-cols-3 gap-2 pb-6">
+            {SHORTCUTS.map((s) => (
               <button
+                key={s.action}
                 type="button"
                 onClick={() => go(s.action)}
-                className="flex w-full items-center gap-3 rounded-2xl border border-border bg-background p-3 text-left transition-colors hover:bg-accent sm:p-4"
+                className="flex flex-col items-center gap-1.5 rounded-2xl py-2 text-xs font-medium text-white/90 hover:bg-white/10"
               >
-                <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-brand/10 text-brand">
-                  <s.icon className="size-6" aria-hidden="true" />
+                <span className="grid size-11 place-items-center rounded-full bg-white/15 backdrop-blur">
+                  <s.icon className="size-5" aria-hidden="true" />
                 </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block font-semibold">
-                    {i + 1}. {s.title}
-                  </span>
-                  <span className="block text-sm text-muted-foreground">{s.text}</span>
-                </span>
-                <span className="hidden shrink-0 items-center gap-1 text-sm font-semibold text-brand sm:flex">
-                  {s.cta} <ArrowRight className="size-4" aria-hidden="true" />
-                </span>
-                <ArrowRight className="size-5 shrink-0 text-brand sm:hidden" aria-hidden="true" />
+                {s.label}
               </button>
-            </li>
-          ))}
-        </ol>
+            ))}
+          </div>
+        </div>
 
-        <button
-          type="button"
-          onClick={close}
-          className="mt-4 min-h-11 w-full text-sm font-medium text-muted-foreground hover:text-foreground"
-        >
-          No thanks, just let me look around
-        </button>
+        {/* Decline / Accept */}
+        <div className="flex shrink-0 items-start justify-between px-10 pb-10">
+          <div className="flex flex-col items-center gap-2">
+            <button
+              type="button"
+              onClick={close}
+              aria-label="Decline, close this"
+              className="grid size-20 place-items-center rounded-full bg-[#ff3b30] shadow-lg transition-transform hover:scale-105 active:scale-95"
+            >
+              <PhoneOff className="size-9" aria-hidden="true" />
+            </button>
+            <span className="text-sm">Decline</span>
+          </div>
+          <div className="flex flex-col items-center gap-2">
+            <button
+              type="button"
+              onClick={answer}
+              aria-label="Accept, speak to Ava"
+              className="grid size-20 place-items-center rounded-full bg-[#34c759] shadow-lg transition-transform hover:scale-105 active:scale-95"
+            >
+              <Phone className="uw-ring size-9 fill-white" aria-hidden="true" />
+            </button>
+            <span className="text-sm">Speak to Ava</span>
+          </div>
+        </div>
+        <span className="absolute bottom-2 left-1/2 h-1 w-32 -translate-x-1/2 rounded-full bg-white/70" aria-hidden="true" />
       </div>
     </div>
   );
