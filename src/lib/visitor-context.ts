@@ -62,7 +62,6 @@ export function describeVisitor(v: VisitorContext): string {
   const lines = [
     `- Signed in: ${v.signedIn ? "yes" : "no"}`,
     v.firstName ? `- First name: ${v.firstName}` : null,
-    `- Membership: ${v.plan === "premium" ? "Premium" : v.plan === "basic" ? "Basic" : v.signedIn ? "no paid plan yet" : "not a member (visitor)"}`,
     v.modulesCompleted !== null ? `- Training modules completed: ${v.modulesCompleted} of 4` : null,
     `- Came to the site from: ${v.source ?? "direct or unknown"}`,
   ].filter(Boolean);

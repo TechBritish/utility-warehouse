@@ -45,9 +45,6 @@ export function SiteHeader() {
           <Link to="/guidelines" className="text-sm text-muted-foreground hover:text-foreground">
             Conversation guide
           </Link>
-          <Link to="/pricing" className="text-sm font-semibold text-brand hover:underline">
-            Pricing
-          </Link>
           <a href="/#bill-check" className="text-sm text-muted-foreground hover:text-foreground">
             Free bill check
           </a>
@@ -56,9 +53,6 @@ export function SiteHeader() {
           </a>
         </nav>
         <div className="flex items-center gap-1 sm:gap-2">
-          <Link to="/pricing" className="px-2 text-sm font-semibold text-brand md:hidden">
-            Pricing
-          </Link>
           <ThemeToggle />
           <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
             <Link to="/login">Sign in</Link>

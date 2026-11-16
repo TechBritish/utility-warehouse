@@ -25,7 +25,6 @@ import { Progress } from "@/components/ui/progress";
 import { AppHeader } from "@/components/uw/AppHeader";
 import { OnboardingTour, useOnboardingTour } from "@/components/uw/OnboardingTour";
 import { RequireAuth } from "@/components/uw/RequireAuth";
-import { PlanBadge } from "@/components/uw/PlanBadge";
 import { AVA_START_EVENT, AvaCallScreen } from "@/components/uw/WelcomePopup";
 import { fireConfetti } from "@/lib/confetti";
 import { getSession, getDisplayName } from "@/lib/auth";
@@ -239,7 +238,6 @@ function Dashboard() {
             <h1 id="progress-heading" className="text-xl font-bold tracking-tight">
               Welcome back, {firstName} 👋
             </h1>
-            <PlanBadge />
             <p className="mt-1 text-sm text-muted-foreground">
               {stats.overallPercent === 0
                 ? "Let's get you started. Tap Start training below."
