@@ -128,7 +128,7 @@ export function AvaCallScreen({
         </div>
 
         {/* Caller */}
-        <div className="flex flex-1 flex-col items-center px-6 pt-6 text-center sm:pt-10">
+        <div className="flex min-h-0 flex-1 flex-col items-center px-6 pt-3 text-center sm:pt-8">
           <p className="text-sm text-white/70">
             Incoming call
             <span className="uw-dot">.</span>
@@ -140,58 +140,58 @@ export function AvaCallScreen({
           </h2>
           <p className="mt-1 text-base text-white/80">Simple Options · Your AI helper</p>
 
-          <div className="relative mt-8 grid size-36 place-items-center sm:size-40">
+          <div className="relative mt-4 grid size-[clamp(5.5rem,17dvh,10rem)] shrink-0 place-items-center sm:mt-8">
             <span className="absolute inset-0 animate-ping rounded-full bg-white/15 motion-reduce:hidden" aria-hidden="true" />
             <span className="absolute -inset-3 rounded-full ring-2 ring-white/10" aria-hidden="true" />
             <img src={aiOrb} alt="" className="relative size-full rounded-full object-cover ring-4 ring-white/20" />
           </div>
 
-          <p className="mt-6 max-w-[16rem] text-sm leading-relaxed text-white/80">
+          <p className="mt-3 max-w-[16rem] text-sm leading-relaxed text-white/80 sm:mt-6">
             {message}
           </p>
-
-          {/* Shortcuts, like the iOS Remind Me / Message row */}
-          <div className="mt-auto grid w-full grid-cols-3 gap-2 pb-6">
-            {shortcuts.map((s) => (
-              <button
-                key={s.label}
-                type="button"
-                onClick={s.onClick}
-                className="flex flex-col items-center gap-1.5 rounded-2xl py-2 text-xs font-medium text-white/90 hover:bg-white/10"
-              >
-                <span className="grid size-11 place-items-center rounded-full bg-white/15 backdrop-blur">
-                  <s.icon className="size-5" aria-hidden="true" />
-                </span>
-                {s.label}
-              </button>
-            ))}
-          </div>
         </div>
 
-        {/* Decline / Accept */}
-        <div className="flex shrink-0 items-start justify-between px-10 pb-10">
-          <div className="flex flex-col items-center gap-2">
+        {/* Decline / Accept (red and green), always in view above the shortcuts */}
+        <div className="flex shrink-0 items-start justify-between px-10 pb-3 pt-2">
+          <div className="flex flex-col items-center gap-1.5">
             <button
               type="button"
               onClick={onDecline}
               aria-label="Decline, close this"
-              className="grid size-20 place-items-center rounded-full bg-[#ff3b30] shadow-lg transition-transform hover:scale-105 active:scale-95"
+              className="grid size-16 place-items-center rounded-full bg-[#ff3b30] shadow-lg transition-transform hover:scale-105 active:scale-95 sm:size-20"
             >
-              <PhoneOff className="size-9" aria-hidden="true" />
+              <PhoneOff className="size-8 sm:size-9" aria-hidden="true" />
             </button>
             <span className="text-sm">Decline</span>
           </div>
-          <div className="flex flex-col items-center gap-2">
+          <div className="flex flex-col items-center gap-1.5">
             <button
               type="button"
               onClick={onAnswer}
               aria-label="Accept, speak to Ava"
-              className="grid size-20 place-items-center rounded-full bg-[#34c759] shadow-lg transition-transform hover:scale-105 active:scale-95"
+              className="grid size-16 place-items-center rounded-full bg-[#34c759] shadow-lg transition-transform hover:scale-105 active:scale-95 sm:size-20"
             >
-              <Phone className="uw-ring size-9 fill-white" aria-hidden="true" />
+              <Phone className="uw-ring size-8 fill-white sm:size-9" aria-hidden="true" />
             </button>
             <span className="text-sm">Speak to Ava</span>
           </div>
+        </div>
+
+        {/* Shortcuts (grey): bill check, join free, sign in. Sit at the bottom, like the iOS Remind Me / Message row */}
+        <div className="grid w-full shrink-0 grid-cols-3 gap-2 px-6 pb-6">
+          {shortcuts.map((s) => (
+            <button
+              key={s.label}
+              type="button"
+              onClick={s.onClick}
+              className="flex flex-col items-center gap-1 rounded-2xl py-1.5 text-xs font-medium text-white/90 hover:bg-white/10"
+            >
+              <span className="grid size-10 place-items-center rounded-full bg-white/15 backdrop-blur">
+                <s.icon className="size-5" aria-hidden="true" />
+              </span>
+              {s.label}
+            </button>
+          ))}
         </div>
         <span className="absolute bottom-2 left-1/2 h-1 w-32 -translate-x-1/2 rounded-full bg-white/70" aria-hidden="true" />
       </div>
